@@ -1,0 +1,23 @@
+/* Reset básico y estructura principal del sitio */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { min-height: 100vh; display: flex; flex-direction: column; }
+.main-nav { padding: 0.5rem 2rem; }
+.main-nav ul { list-style: none; display: flex; gap: 2rem; flex-wrap: wrap; }
+.main-nav a { text-decoration: none; font-weight: bold; position: relative; padding: 10px 0; display: inline-block; }
+.layout { display: flex; flex: 1; min-height: 0; }
+.sidebar { width: 220px; padding: 1rem; transition: transform 0.3s ease-in-out; }
+.sidebar ul { list-style: none; }
+.sidebar a { display: block; padding: 0.6rem 0; text-decoration: none; }
+.content { flex: 1; padding: 2rem; overflow-y: auto; }
+.site-footer { padding: 1.5rem 2rem; text-align: center; font-size: 0.9rem; }
+.error-404 { text-align: center; padding: 4rem 2rem; }
+.error-404 .error-img { max-width: 220px; margin: 1rem auto; display: block; }
+.error-404 h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+.error-404 p { font-style: italic; font-size: 1.1rem; margin: 1rem 0 2rem; line-height: 1.5; }
+.error-404 .error-buttons { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+.error-404 .btn-error { padding: 0.8rem 1.5rem; display: inline-block; border-radius: 8px; text-decoration: none; font-weight: bold; }
+@media (max-width: 768px) {
+  .layout { flex-direction: column; }
+  .sidebar { transform: translateX(-100%); position: absolute; height: 100%; z-index: 999; }
+  .sidebar.active { transform: translateX(0); }
+}

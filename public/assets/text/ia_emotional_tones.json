@@ -1,0 +1,30 @@
+[
+  {
+    "nombre": "😄 Alegre/Optimista",
+    "keyword": "joyful, optimistic, cheerful mood"
+  },
+  {
+    "nombre": "😔 Melancólico/Triste",
+    "keyword": "melancholy, sorrowful, somber atmosphere"
+  },
+  {
+    "nombre": "🤫 Misterioso/Enigmático",
+    "keyword": "mysterious, enigmatic, arcane aura"
+  },
+  {
+    "nombre": "⚔️ Épico/Heroico",
+    "keyword": "epic, heroic, grand scale"
+  },
+  {
+    "nombre": "🌌 Tranquilo/Sereno",
+    "keyword": "peaceful, serene, calm atmosphere"
+  },
+  {
+    "nombre": "😨 Intenso/Dramático",
+    "keyword": "intense, dramatic, high contrast"
+  },
+  {
+    "nombre": "🥰 Amoroso/Cálido",
+    "keyword": "loving, warm, tender emotions"
+  }
+]

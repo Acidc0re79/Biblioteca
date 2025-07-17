@@ -1,0 +1,4 @@
+<FilesMatch "\.(php|key|inc)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

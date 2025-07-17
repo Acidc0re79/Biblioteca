@@ -1,0 +1,34 @@
+[
+  {
+    "nombre": "🚶‍♂️ De pie",
+    "keyword": "standing"
+  },
+  {
+    "nombre": " sentado",
+    "keyword": "sitting"
+  },
+  {
+    "nombre": "🏃‍♀️ Corriendo",
+    "keyword": "running"
+  },
+  {
+    "nombre": "📚 Leyendo",
+    "keyword": "reading"
+  },
+  {
+    "nombre": "💭 Pensando",
+    "keyword": "thinking"
+  },
+  {
+    "nombre": "👋 Saludando",
+    "keyword": "waving"
+  },
+  {
+    "nombre": "🤸 Saltando",
+    "keyword": "jumping"
+  },
+  {
+    "nombre": "💤 Durmiendo",
+    "keyword": "sleeping"
+  }
+]

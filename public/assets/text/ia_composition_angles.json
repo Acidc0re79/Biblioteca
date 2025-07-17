@@ -1,0 +1,30 @@
+[
+  {
+    "nombre": "🎥 Toma Amplia (Wide Shot)",
+    "keyword": "wide shot, expansive view"
+  },
+  {
+    "nombre": "🔎 Primer Plano (Close-up)",
+    "keyword": "close-up shot, detailed focus"
+  },
+  {
+    "nombre": "🎬 Cinematográfico",
+    "keyword": "cinematic shot, widescreen, film grain"
+  },
+  {
+    "nombre": "⬇️ Ángulo Bajo (Low Angle)",
+    "keyword": "low angle perspective, powerful, majestic"
+  },
+  {
+    "nombre": "⬆️ Ángulo Alto (High Angle)",
+    "keyword": "high angle perspective, vulnerable, overview"
+  },
+  {
+    "nombre": "📐 Regla de Tercios",
+    "keyword": "rule of thirds composition, balanced"
+  },
+  {
+    "nombre": "👁️ Perspectiva del Observador",
+    "keyword": "POV shot, observer's perspective"
+  }
+]

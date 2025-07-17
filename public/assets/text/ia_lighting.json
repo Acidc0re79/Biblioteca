@@ -1,0 +1,26 @@
+[
+  {
+    "nombre": "☀️ Luz del Día (Brillante)",
+    "keyword": "bright daylight"
+  },
+  {
+    "nombre": "💡 Luz de Neón (Futurista)",
+    "keyword": "neon lighting, futuristic"
+  },
+  {
+    "nombre": "👻 Luz Misteriosa",
+    "keyword": "mysterious dramatic lighting"
+  },
+  {
+    "nombre": "🌅 Atardecer/Amanecer (Cálida)",
+    "keyword": "warm sunset or sunrise lighting"
+  },
+  {
+    "nombre": "🌧️ Luz Ambiental (Nublado)",
+    "keyword": "overcast soft ambient light"
+  },
+  {
+    "nombre": "🔦 Luz Focalizada (Spotlight)",
+    "keyword": "focused spotlight"
+  }
+]

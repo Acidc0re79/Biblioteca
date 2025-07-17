@@ -1,0 +1,13 @@
+/* Estructura y layout de los formularios de autenticación */
+.mensaje-exito, .mensaje-error { padding: 12px; margin-bottom: 16px; text-align: center; border-radius: 8px; font-weight: bold; }
+.google-btn { text-align: center; margin-top: 1rem; width: 100%; }
+.google-btn img { width: 220px; height: auto; display: inline-block; margin: 0 auto; }
+.form-wrapper { max-width: 400px; margin: 0 auto; padding: 20px; overflow: hidden; position: relative; }
+.forms-container { display: flex; width: 200%; transition: transform 0.5s ease-in-out; }
+.form-box { width: 50%; flex-shrink: 0; padding: 20px; border-radius: 12px; box-sizing: border-box; }
+.form-box input { width: 100%; padding: 0.75rem; margin: 0.5rem 0; border: none; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+.form-box button { width: 100%; padding: 0.8rem; border: none; border-radius: 8px; font-weight: bold; margin-top: 1rem; cursor: pointer; transition: background 0.3s ease; }
+.form-box a { display: block; text-align: center; margin-top: 1rem; text-decoration: underline; cursor: pointer; }
+.form-box h2 { text-align: center; margin-bottom: 1.5rem; }
+.form-toggle { text-align: center; margin-bottom: 15px; }
+.form-toggle button { border: none; padding: 10px 20px; margin: 0 5px; cursor: pointer; font-weight: bold; border-radius: 6px; transition: background-color 0.3s ease; }

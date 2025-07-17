@@ -1,0 +1,86 @@
+/* ========================================= */
+/* Estilos para el Toggle Switch ON/OFF      */
+/* ========================================= */
+
+.toggle-switch-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 15px 0;
+  cursor: pointer;
+}
+
+.toggle-switch-container p {
+  margin: 0;
+  font-size: 0.95em;
+  color: var(--color-texto-principal); /* Color de texto del tema */
+}
+
+/* Ocultar el checkbox original (Ajustes más robustos) */
+.toggle-switch-checkbox {
+  position: absolute; /* Lo sacamos del flujo normal */
+  width: 0; /* Ancho cero */
+  height: 0; /* Alto cero */
+  opacity: 0; /* Opacidad cero */
+  pointer-events: none; /* No permite interacciones de ratón */
+  overflow: hidden; /* Oculta cualquier contenido extra */
+}
+
+.toggle-switch-label {
+  display: block;
+  width: 70px; /* Ancho del switch (más estirado) */
+  height: 28px; /* Alto del switch */
+  background-color: var(--color-texto-secundario); /* Color de fondo cuando está OFF (grisáceo) */
+  border-radius: 14px; /* Mantenemos el radio para los extremos */
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+}
+
+.toggle-switch-label::after {
+  content: '';
+  display: block;
+  width: 24px; /* Ancho del "pulgar" o círculo deslizante */
+  height: 24px; /* Alto del "pulgar" */
+  background-color: #f0f0f0; /* Color del círculo */
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 3px; /* Ajustamos la posición inicial del "pulgar" (antes era 4px) */
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Texto ON/OFF dentro del switch */
+.toggle-switch-label::before {
+    content: 'OFF';
+    position: absolute;
+    top: 50%;
+    left: 40px; /* Ajustamos la posición del texto OFF (antes era 38px) */
+    transform: translateY(-50%);
+    font-size: 10px;
+    font-weight: bold;
+    color: #fff;
+    opacity: 1; /* Visible cuando OFF */
+    transition: all 0.3s ease;
+}
+
+
+/* ESTADO ON: cuando el checkbox está marcado */
+.toggle-switch-checkbox:checked + .toggle-switch-label {
+  background-color: var(--color-primario-acento); /* Color de acento del tema cuando está ON */
+  box-shadow: var(--brillo-primario, 0 0 5px var(--color-primario-acento)); /* Brillo si el tema lo tiene */
+}
+
+.toggle-switch-checkbox:checked + .toggle-switch-label::after {
+  transform: translateX(43px); /* Mueve el círculo a la derecha (antes era 42px) */
+  background-color: #fff; /* Blanco para el círculo en ON */
+}
+
+.toggle-switch-checkbox:checked + .toggle-switch-label::before {
+    content: 'ON';
+    left: 10px; /* Mantenemos la posición del texto ON */
+    opacity: 1; /* Visible cuando ON */
+    color: #000; /* Texto negro para ON */
+}

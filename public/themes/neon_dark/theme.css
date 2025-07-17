@@ -1,0 +1,98 @@
+/* ========================================= */
+/* TEMA NEON DARK - Versión Completa         */
+/* ========================================= */
+
+:root {
+  /* Paleta de Colores Neón */
+  --color-fondo-principal: #0a0a0a;
+  --color-fondo-contenido: #121212;
+  --color-fondo-elementos: #1a1a1a;
+  --color-texto-principal: #e0e0e0;
+  --color-texto-secundario: #a0a0a0;
+  --color-primario-acento: #00ffcc; /* Cian Neón */
+  --color-secundario-acento: #ff00ff; /* Magenta Neón */
+  
+  /* Efecto de "brillo" */
+  --brillo-primario: 0 0 5px var(--color-primario-acento), 0 0 10px var(--color-primario-acento);
+  --brillo-secundario: 0 0 5px var(--color-secundario-acento), 0 0 10px var(--color-secundario-acento);
+
+  /* NUEVO: Color para elementos "usados" en IA */
+  --color-usado-ia: #666666; /* Un gris que contraste mejor en el tema neón (antes era #444444) */
+}
+
+body {
+  background: var(--color-fondo-principal);
+  color: var(--color-texto-principal);
+  font-family: 'Consolas', 'Monaco', monospace;
+}
+
+/* ========================================= */
+/* HEADER Y NAVEGACIÓN                     */
+/* ========================================= */
+.header {
+  background: var(--color-fondo-elementos);
+  border-bottom: 2px solid var(--color-primario-acento);
+  box-shadow: var(--brillo-primario);
+}
+.header h1 { color: #fff; text-shadow: var(--brillo-primario); }
+.btn-header { background-color: transparent; color: var(--color-primario-acento); border: 2px solid var(--color-primario-acento); }
+.btn-header:hover { background-color: var(--color-primario-acento); color: #000; box-shadow: var(--brillo-primario); }
+.btn-header.btn-secondary { color: var(--color-secundario-acento); border-color: var(--color-secundario-acento); }
+.btn-header.btn-secondary:hover { background-color: var(--color-secundario-acento); color: #000; box-shadow: var(--brillo-secundario); }
+.user-avatar { border: 3px solid var(--color-secundario-acento); box-shadow: var(--brillo-secundario); }
+.user-dropdown { background: rgba(10, 10, 10, 0.9); border: 1px solid var(--color-primario-acento); backdrop-filter: blur(5px); }
+.dropdown-link { color: var(--color-primario-acento); }
+.dropdown-link:hover { color: var(--color-secundario-acento); }
+.main-nav { background: var(--color-fondo-elementos); }
+.main-nav a:hover { color: var(--color-primario-acento); }
+
+/* ========================================= */
+/* PERFIL Y MODAL (TEMA NEON DARK)           */
+/* ========================================= */
+.perfil-box { background: var(--color-fondo-elementos); border: 1px solid #333; }
+.perfil-box h2 { color: var(--color-primario-acento); text-shadow: var(--brillo-primario); }
+.perfil-avatar-img { border: 2px solid #555; }
+.perfil-avatar-overlay { background: rgba(0, 0, 0, 0.7); }
+.icono-lapiz, .avatar-action-icon { color: var(--color-primario-acento); }
+.btn-perfil { background-color: var(--color-secundario-acento); color: #000; font-weight: bold; }
+
+/* Modal */
+.modal-overlay { background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(8px); }
+.modal-contenido { background: #0d0d0d; border: 1px solid var(--color-primario-acento); box-shadow: var(--brillo-primario); }
+.modal-close { color: #aaa; }
+
+/* --- ESTILOS DE PESTAÑAS MEJORADOS --- */
+.modal-tabs {
+    border-bottom: 1px solid var(--color-primario-acento);
+    margin-bottom: 1.5rem;
+}
+.tab-link {
+    color: #777;
+    background-color: transparent;
+    border: none;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+.tab-link:hover {
+    color: var(--color-primario-acento);
+}
+.tab-link.active {
+    color: var(--color-primario-acento);
+    font-weight: bold;
+    border-bottom: 3px solid var(--color-primario-acento);
+    text-shadow: var(--brillo-primario);
+}
+
+.avatar-seleccionable.selected {
+  border-color: var(--color-secundario-acento);
+  box-shadow: var(--brillo-secundario);
+}
+#formCrearAvatar select, #formCrearAvatar textarea {
+  background: #000;
+  border: 1px solid #444;
+  color: var(--color-texto-principal);
+}
+#formCrearAvatar select:focus, #formCrearAvatar textarea:focus {
+  border-color: var(--color-primario-acento);
+  box-shadow: 0 0 10px var(--color-primario-acento);
+}

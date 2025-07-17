@@ -1,0 +1,26 @@
+[
+  {
+    "nombre": "👤 Persona",
+    "keyword": "human character"
+  },
+  {
+    "nombre": "🐾 Animal",
+    "keyword": "animal character"
+  },
+  {
+    "nombre": "👽 Criatura Fantástica",
+    "keyword": "fantasy creature"
+  },
+  {
+    "nombre": "🤖 Robot/Cyborg",
+    "keyword": "robot or cyborg"
+  },
+  {
+    "nombre": "🚀 Objeto/Vehículo",
+    "keyword": "object or vehicle"
+  },
+  {
+    "nombre": "✨ Abstracto/Símbolo",
+    "keyword": "abstract symbol"
+  }
+]

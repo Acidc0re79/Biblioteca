@@ -1,0 +1,34 @@
+[
+  {
+    "nombre": "🏞️ Naturaleza (Bosque/Montaña)",
+    "keyword": "natural environment, forest and mountains"
+  },
+  {
+    "nombre": "🏙️ Ciudad (Urbano)",
+    "keyword": "urban city environment"
+  },
+  {
+    "nombre": "🌌 Espacio (Estrellas/Galaxia)",
+    "keyword": "outer space, stars and galaxy"
+  },
+  {
+    "nombre": "🏠 Interior (Habitación/Oficina)",
+    "keyword": "indoor environment, room or office"
+  },
+  {
+    "nombre": "🌈 Fondo Abstracto/Colorido",
+    "keyword": "abstract colorful background"
+  },
+  {
+    "nombre": "💡 Fondo Minimalista",
+    "keyword": "minimalist simple background"
+  },
+  {
+    "nombre": "🌊 Submarino",
+    "keyword": "underwater scene"
+  },
+  {
+    "nombre": "🏜️ Desierto",
+    "keyword": "desert landscape"
+  }
+]
