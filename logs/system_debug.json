@@ -1,0 +1,24 @@
+{"timestamp":"2025-07-15 14:05:44","level":"DEBUG","message":"Login exitoso para usuario ID: 1 (acidc0re79@gmail.com).","context":[]}
+{"timestamp":"2025-07-15 14:14:17","level":"DEBUG","message":"Cierre de sesión exitoso.","context":{"id_usuario":1}}
+{"timestamp":"2025-07-15 14:14:40","level":"DEBUG","message":"Login exitoso para usuario ID: 1 (acidc0re79@gmail.com).","context":[]}
+{"timestamp":"2025-07-15 14:14:51","level":"DEBUG","message":"Cierre de sesión exitoso.","context":{"id_usuario":1}}
+{"timestamp":"2025-07-15 14:16:11","level":"DEBUG","message":"Nuevo registro de usuario local exitoso. ID: 10, Email: juan@paco.com.","context":[]}
+{"timestamp":"2025-07-15 14:29:47","level":"DEBUG","message":"Google Login: Usuario existente encontrado.","context":{"id_usuario":2,"email":"anturios@gmail.com"}}
+{"timestamp":"2025-07-15 14:29:47","level":"DEBUG","message":"Login con Google exitoso.","context":{"id_usuario":2}}
+{"timestamp":"2025-07-15 14:30:11","level":"DEBUG","message":"Cierre de sesión exitoso.","context":{"id_usuario":2}}
+{"timestamp":"2025-07-15 14:30:41","level":"DEBUG","message":"form-handler.php: Se recibió una acción no válida.","context":{"accion_recibida":"eliminar_usuario_admin"}}
+{"timestamp":"2025-07-15 14:31:36","level":"DEBUG","message":"Login exitoso para usuario ID: 1 (acidc0re79@gmail.com).","context":[]}
+{"timestamp":"2025-07-15 14:32:09","level":"DEBUG","message":"form-handler.php: Se recibió una acción no válida.","context":{"accion_recibida":"eliminar_usuario_admin"}}
+{"timestamp":"2025-07-15 14:47:48","level":"DEBUG","message":"Usuario eliminado exitosamente desde el panel.","context":{"admin_id":1,"usuario_eliminado_id":10}}
+{"timestamp":"2025-07-15 14:49:09","level":"DEBUG","message":"Usuario eliminado exitosamente desde el panel.","context":{"admin_id":1,"usuario_eliminado_id":8}}
+{"timestamp":"2025-07-15 15:04:23","level":"DEBUG","message":"Login exitoso para usuario ID: 1 (acidc0re79@gmail.com).","context":[]}
+{"timestamp":"2025-07-16 01:48:34","level":"DEBUG","message":"Perfil de usuario actualizado con éxito.","context":{"id_usuario":1}}
+{"timestamp":"2025-07-16 01:49:29","level":"DEBUG","message":"Cierre de sesión exitoso.","context":{"id_usuario":1}}
+{"timestamp":"2025-07-16 01:52:13","level":"DEBUG","message":"Google Login: Nuevo usuario creado.","context":{"id_usuario":"11","email":"antumagis@gmail.com"}}
+{"timestamp":"2025-07-16 01:52:13","level":"DEBUG","message":"Flag 'password_creation_required' activado.","context":{"id_usuario":11}}
+{"timestamp":"2025-07-16 01:52:13","level":"DEBUG","message":"Login con Google exitoso.","context":{"id_usuario":11}}
+{"timestamp":"2025-07-16 03:12:05","level":"DEBUG","message":"Error de BD al cargar insignias.","context":{"id_usuario":11,"error":"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'activa' in 'where clause'"}}
+{"timestamp":"2025-07-16 03:12:19","level":"DEBUG","message":"Error de BD al cargar insignias.","context":{"id_usuario":11,"error":"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'activa' in 'where clause'"}}
+{"timestamp":"2025-07-16 17:30:02","level":"DEBUG","message":"Login exitoso para usuario ID: 1 (acidc0re79@gmail.com).","context":[]}
+{"timestamp":"2025-07-16 17:30:13","level":"DEBUG","message":"Cierre de sesión exitoso.","context":{"id_usuario":1}}
+{"timestamp":"2025-07-16 17:30:26","level":"DEBUG","message":"Login exitoso para usuario ID: 1 (acidc0re79@gmail.com).","context":[]}

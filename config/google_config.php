@@ -1,7 +1,7 @@
 <?php
 return [
-  'client_id' => 'id',
-  'client_secret' => 'secret',
-  'redirect_uri' => 'https://biblioteca.syslr.com.ar/google_callback.php'
+  'client_id' => 'aqui_client_id',
+  'client_secret' => 'secret_key',
+  'redirect_uri' => 'uri_proyecto'
 ];
 ?>

@@ -1,0 +1,77 @@
+/* Estructura y layout de la página de insignias (Estilo Clásico de Grilla con Flexbox) */
+.insignias-container {
+    max-width: 1200px;
+    padding: 20px;
+    margin: auto; /* Centra el contenedor principal */
+}
+
+.seccion-titulo {
+    text-align: center;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+.categoria-titulo {
+    text-align: center;
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    font-size: 1.5em;
+    font-weight: 300;
+}
+
+.insignia-grid {
+    display: flex; /* Usamos Flexbox para la grilla flexible */
+    flex-wrap: wrap; /* Permite que los elementos pasen a la siguiente línea */
+    justify-content: center; /* Centra las insignias en el contenedor */
+    gap: 30px; /* Espacio entre tarjetas */
+}
+
+.insignia-card {
+    width: 180px; /* Ancho fijo para cada tarjeta */
+    padding: 15px;
+    text-align: center;
+    border-radius: 12px;
+    border-width: 3px;
+    border-style: solid;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Alinea el contenido verticalmente */
+}
+
+.insignia-card:hover {
+    transform: translateY(-5px);
+}
+
+.insignia-card img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    margin: 0 auto 10px auto; /* Centra la imagen y le da margen inferior */
+    user-select: none;
+}
+
+.insignia-card.locked img {
+    filter: grayscale(90%) brightness(60%);
+}
+
+.insignia-nombre {
+    font-size: 1em;
+    font-weight: bold;
+    min-height: 40px; /* Espacio para dos líneas de texto */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.insignia-puntos {
+    display: block;
+    margin-top: 8px;
+    font-weight: bold;
+    font-size: 0.9em;
+}

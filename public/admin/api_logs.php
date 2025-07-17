@@ -1,103 +1,109 @@
 <?php
-// /admin/api_logs.php
-// Página de administración para leer los logs de la API.
+// /public/admin/api_logs.php (Versión 2.1 - A prueba de errores)
 
-require_once __DIR__ . '/includes/auth.php'; // Asegurar que solo admins/moderadores puedan acceder
-require_once dirname(__DIR__, 2) . '/utils/log_api_event.php'; // Incluir la función de log para acceder a la ruta del archivo
+require_once '../../config/init.php';
+require_once 'includes/auth.php'; // Asegura que solo admin/mod pueden ver esto
 
-$log_file = ROOT_PATH . '/log/api_debug_log.json';
+$log_file = ROOT_PATH . '/public/log/api_debug_log.json';
 $logs = [];
 
 if (file_exists($log_file)) {
-    $logs = json_decode(file_get_contents($log_file), true);
-    if ($logs === null) { // Si el JSON está corrupto
-        $logs = [['timestamp' => date('Y-m-d H:i:s'), 'type' => 'ERROR', 'details' => 'Archivo de log JSON corrupto.']];
+    // Leemos el archivo línea por línea
+    $log_lines = file($log_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($log_lines as $line) {
+        $decoded_line = json_decode($line, true);
+        // Nos aseguramos que la decodificación fue exitosa antes de añadirlo
+        if (json_last_error() === JSON_ERROR_NONE) {
+            $logs[] = $decoded_line;
+        }
     }
-} else {
-    $logs = [['timestamp' => date('Y-m-d H:i:s'), 'type' => 'INFO', 'details' => 'El archivo de log aún no existe o está vacío.']];
+    // Mostramos los logs más recientes primero
+    $logs = array_reverse($logs);
 }
+
+$page_title = "Logs de API";
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Logs de API - Biblioteca SYS Admin</title>
-  <link rel="stylesheet" href="/admin/assets/css/admin.css">
-  <style>
-    /* Estilos específicos para esta página de logs */
-    .log-entry {
-        background-color: #333;
-        color: #ddd;
-        padding: 15px;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        font-family: monospace;
-        white-space: pre-wrap; /* Mantiene saltos de línea y respeta espacios */
-        word-break: break-word; /* Rompe palabras largas */
-    }
-    .log-entry.error { background-color: #c0392b; }
-    .log-entry.success { background-color: #27ae60; }
-    .log-entry.warning { background-color: #f39c12; }
-
-    .log-entry h4 {
-        margin-top: 0;
-        margin-bottom: 5px;
-        color: #fff;
-        font-size: 1.1em;
-    }
-    .log-entry p {
-        margin: 0;
-        font-size: 0.9em;
-    }
-  </style>
-</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $page_title; ?> - Panel de Admin</title>
+    <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="stylesheet" href="assets/css/logs.css"> </head>
 <body>
-  <?php include __DIR__ . '/includes/header.php'; ?>
-  <main class="admin-layout">
-    <?php include __DIR__ . '/includes/nav.php'; ?>
+    <div class="admin-wrapper">
+        <?php include 'includes/nav.php'; ?>
+        <main class="admin-main">
+            <?php include 'includes/header.php'; ?>
+            <div class="admin-content">
+                <h2><?php echo $page_title; ?></h2>
+                <p>Aquí se registran las interacciones con las APIs externas cuando el modo de depuración está activo.</p>
 
-    <section class="admin-content">
-      <h1>Logs de Actividad de API</h1>
-      <p>Aquí puedes ver el historial de llamadas a las APIs de IA, incluyendo intentos de clave y respuestas.</p>
-      
-      <div class="log-list">
-        <?php foreach ($logs as $log): ?>
-          <?php 
-            $log_class = '';
-            if (strpos($log['details']['status'] ?? '', 'Error') !== false || strpos($log['details']['response'] ?? '', '"success":false') !== false || $log['type'] === 'ERROR') {
-                $log_class = 'error';
-            } elseif ($log['details']['status'] ?? '' === 'OK' || strpos($log['details']['response'] ?? '', '"success":true') !== false) {
-                $log_class = 'success';
-            } else if (strpos($log['details']['status'] ?? '', 'Advertencia') !== false) {
-                $log_class = 'warning';
+                <div class="logs-container">
+                    <?php if (empty($logs)): ?>
+                        <div class="log-card">
+                            <div class="log-card-body">
+                                <p>No hay entradas en el log de API.</p>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($logs as $index => $log): ?>
+                            <div class="log-card">
+                                <div class="log-card-header">
+                                    <span class="log-chip log-<?php echo htmlspecialchars($log['type'] ?? 'default'); ?>">
+                                        <?php echo htmlspecialchars(strtoupper($log['type'] ?? '')); ?>
+                                    </span>
+                                    <span class="log-timestamp"><?php echo htmlspecialchars($log['timestamp'] ?? ''); ?></span>
+                                    <button class="copy-btn" data-target="log-content-<?php echo $index; ?>">Copiar</button>
+                                </div>
+                                <div class="log-card-body">
+                                    <pre id="log-content-<?php echo $index; ?>"><?php
+                                        if (isset($log['details'])) {
+                                            echo htmlspecialchars(json_encode($log['details'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                                        } else {
+                                            echo htmlspecialchars(json_encode($log, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                                        }
+                                    ?></pre>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('.logs-container');
+    if (container) {
+        container.addEventListener('click', function(event) {
+            if (event.target.classList.contains('copy-btn')) {
+                const button = event.target;
+                const targetId = button.dataset.target;
+                const logContentElement = document.getElementById(targetId);
+
+                if (logContentElement) {
+                    navigator.clipboard.writeText(logContentElement.textContent).then(() => {
+                        const originalText = button.textContent;
+                        button.textContent = '¡Copiado!';
+                        button.classList.add('copied');
+                        
+                        setTimeout(() => {
+                            button.textContent = originalText;
+                            button.classList.remove('copied');
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Error al copiar el log: ', err);
+                        alert('No se pudo copiar el texto.');
+                    });
+                }
             }
-          ?>
-          <div class="log-entry <?= $log_class ?>">
-            <h4><?= htmlspecialchars($log['timestamp']) ?> - Tipo: <?= htmlspecialchars($log['type']) ?></h4>
-            <?php foreach ($log['details'] as $key => $value): ?>
-                <p><strong><?= htmlspecialchars(ucfirst(str_replace('_', ' ', $key))) ?>:</strong> 
-                <?php 
-                    // Formatear JSON si es una cadena JSON
-                    if (is_string($value) && (str_starts_with(trim($value), '{') || str_starts_with(trim($value), '['))) {
-                        $json_decoded = json_decode($value);
-                        if (json_last_error() === JSON_ERROR_NONE) {
-                            echo '<pre>' . htmlspecialchars(json_encode($json_decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) . '</pre>';
-                        } else {
-                            echo htmlspecialchars($value);
-                        }
-                    } else if (is_array($value)) {
-                        echo htmlspecialchars(json_encode($value)); // Para arrays pequeños
-                    }
-                    else {
-                        echo htmlspecialchars($value);
-                    }
-                ?>
-                </p>
-            <?php endforeach; ?>
-          </div>
-        <?php endforeach; ?>
-      </div>
-    </section>
-  </main>
+        });
+    }
+});
+</script>
+
 </body>
 </html>

@@ -1,44 +1,53 @@
 <?php
-// /utils/acciones/perfil/crear_password.php (Versión Final Corregida)
+// Este script asume que ajax-handler.php ya cargó init.php
 
-// Usamos el ROOT_PATH que nos pasa el form-handler
-require_once ROOT_PATH . '/config/init.php';
+// Seguridad: Verificar que el usuario está logueado
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['status' => 'error', 'message' => 'No autorizado']);
+    exit;
+}
 
-// ✅ CORRECCIÓN: Verificamos la sesión principal del usuario, no una temporal.
-// Esto confirma que el usuario está legítimamente logueado y necesita crear una contraseña.
-if (!isset($_SESSION['password_creation_required']) || !isset($_SESSION['usuario_id'])) {
-    die('Error: No tienes permiso para realizar esta acción.');
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['status' => 'error', 'message' => 'Método no permitido']);
+    exit;
 }
 
 $password = $_POST['password'] ?? '';
-$confirmar_password = $_POST['confirmar_password'] ?? '';
-$id_usuario = $_SESSION['usuario_id']; // Usamos el ID de la sesión real
+$password_confirm = $_POST['password_confirm'] ?? '';
+$user_id = $_SESSION['user_id'];
 
-if (empty($password) || $password !== $confirmar_password) {
-    header('Location: /index.php?pagina=perfil&error=password_mismatch');
+if (empty($password) || strlen($password) < 8) {
+    echo json_encode(['status' => 'error', 'message' => 'La contraseña debe tener al menos 8 caracteres.']);
     exit;
 }
-    
-$pepper = trim(file_get_contents(ROOT_PATH . '/config/pepper.key'));
-$salt = bin2hex(random_bytes(16));
-$password_peppered = hash_hmac("sha256", $password, $pepper);
-$hash = password_hash($password_peppered . $salt, PASSWORD_DEFAULT);
+if ($password !== $password_confirm) {
+    echo json_encode(['status' => 'error', 'message' => 'Las contraseñas no coinciden.']);
+    exit;
+}
 
 try {
-    $stmt = $pdo->prepare("UPDATE usuarios SET hash_password = ?, salt = ? WHERE id_usuario = ?");
-    $stmt->execute([$hash, $salt, $id_usuario]);
+    // Creación de la contraseña segura
+    $salt = bin2hex(random_bytes(16));
+    $password_peppered = hash_hmac("sha256", $password, PEPPER);
+    $hash_password = password_hash($password_peppered . $salt, PASSWORD_DEFAULT);
 
-    // --- UNIFICACIÓN COMPLETA ---
-    // Limpiamos la bandera de la sesión, ya que la tarea se ha completado.
-    unset($_SESSION['password_creation_required']);
+    // Actualizar el usuario en la base de datos
+    $stmt = $pdo->prepare("UPDATE usuarios SET hash_password = ?, salt = ? WHERE id_usuario = ?");
     
-    // Redirigimos al perfil. El usuario ya tiene una sesión completa y activa.
-    header("Location: /index.php?pagina=perfil&unificacion=ok");
-    exit;
+    if ($stmt->execute([$hash_password, $salt, $user_id])) {
+        // Registro de éxito
+        log_system_event("Contraseña local creada para cuenta de Google.", ['id_usuario' => $user_id]);
+        
+        // Limpiamos el flag de la sesión
+        unset($_SESSION['password_creation_required']);
+
+        echo json_encode(['status' => 'success', 'message' => 'Contraseña creada con éxito. Ahora puedes iniciar sesión con tu correo y esta nueva contraseña.']);
+    } else {
+        log_system_event("Error al crear contraseña local.", ['id_usuario' => $user_id, 'error_info' => $stmt->errorInfo()]);
+        echo json_encode(['status' => 'error', 'message' => 'No se pudo actualizar la contraseña.']);
+    }
 
 } catch (PDOException $e) {
-    // En caso de un error de base de datos, lo registramos y mostramos un error.
-    error_log("Error al actualizar la contraseña: " . $e->getMessage());
-    die("Error crítico: No se pudo actualizar la contraseña. Por favor, contacta al administrador.");
+    log_system_event("Excepción de BD al crear contraseña local.", ['id_usuario' => $user_id, 'error_message' => $e->getMessage()]);
+    echo json_encode(['status' => 'error', 'message' => 'Error de base de datos.']);
 }
-?>

@@ -1,83 +1,56 @@
 <?php
-// /public/index.php (Versión Corregida y Robusta)
+require_once __DIR__ . '/../config/init.php';
 
-// 1. Define la ruta raíz del proyecto de forma explícita y segura.
-// dirname(__DIR__) toma la ruta del directorio actual (/public) y sube un nivel,
-// apuntando directamente a la raíz de tu proyecto.
-$project_root = dirname(__DIR__);
+$rutas_paginas = glob(ROOT_PATH . '/public/paginas/*.php');
+$paginas_permitidas = array_map(fn($ruta) => basename($ruta, '.php'), $rutas_paginas);
 
-// 2. Ahora, incluye el archivo de inicialización usando esa ruta absoluta y sin ambigüedades.
-require_once $project_root . '/config/init.php';
+$pagina_solicitada = $_GET['p'] ?? 'main';
 
-// A partir de aquí, el resto del archivo HTML no necesita ningún cambio.
+$paginas_protegidas = ['perfil', 'otra_pagina_privada'];
+if (in_array($pagina_solicitada, $paginas_protegidas) && !isset($_SESSION['user_id'])) {
+    header('Location: ' . BASE_URL . 'index.php?p=login_form');
+    exit;
+}
+
+$theme = $_SESSION['tema'] ?? 'default';
 ?>
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="<?= htmlspecialchars($theme); ?>">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Biblioteca Digital SYS</title>
-  <link rel="stylesheet" href="/assets/css/estructura.css">
-  <link rel="stylesheet" href="/assets/css/header.css">
-  
-  <?php
-    // --- LÓGICA PARA CARGAR EL TEMA DINÁMICO ---
-    $tema_actual = $_SESSION['tema'] ?? 'default';
-    $ruta_tema_css = "/themes/{$tema_actual}/theme.css";
-    $ruta_fisica_tema_css = ROOT_PATH . '/public' . $ruta_tema_css;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Digital SYS</title>
     
-    if (!file_exists($ruta_fisica_tema_css)) {
-        $ruta_tema_css = "/themes/default/theme.css";
-    }
-  ?>
-  
-  <link rel="stylesheet" href="<?= $ruta_tema_css ?>">
-  
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?= BASE_URL; ?>assets/css/estructura.css?v=<?= time(); ?>">
+    <link rel="stylesheet" href="<?= BASE_URL; ?>assets/css/header.css?v=<?= time(); ?>">
+    <link rel="stylesheet" id="theme-style" href="<?= BASE_URL; ?>themes/<?= htmlspecialchars($theme); ?>/theme.css?v=<?= time(); ?>">
+    
+    <link rel="stylesheet" href="<?= BASE_URL; ?>assets/css/logs_viewer.css?v=<?= time(); ?>">
 </head>
 <body>
-  <?php include ROOT_PATH . '/public/includes/header.php'; ?>
+    <div id="main-container">
+        <?php include ROOT_PATH . '/public/includes/header.php'; ?>
+        <?php include ROOT_PATH . '/public/includes/nav.php'; ?>
 
-  <?php
-  // ✅ INICIO DE LA MODIFICACIÓN
-  // Ahora, solo bloqueamos al usuario si NO tiene una sesión de login completa
-  // Y TAMPOCO tiene la sesión temporal para crear una contraseña.
-  if (!isset($_SESSION['usuario_id']) && !isset($_SESSION['password_creation_required'])) {
-    // Si no tiene ninguna de las dos, mostramos el formulario de login.
-    echo "<p style='color: red; font-weight: bold;'>Debes iniciar sesión para acceder al contenido.</p>";
-    include ROOT_PATH . '/public/users/login_form.php';
-  } else {
-    // Si tiene una sesión (completa o temporal), le mostramos el contenido normal.
-    include ROOT_PATH . '/public/includes/nav.php'; ?>
+        <div id="content-wrap">
+            <main class="container-fluid flex-grow-1">
+                <?php
+                if (in_array($pagina_solicitada, $paginas_permitidas)) {
+                    include ROOT_PATH . '/public/paginas/' . $pagina_solicitada . '.php';
+                } else {
+                    include ROOT_PATH . '/public/paginas/404.php';
+                }
+                ?>
+            </main>
+        </div>
 
-    <main class="layout">
-      <?php include ROOT_PATH . '/public/includes/sidebar.php'; ?>
+        <?php include ROOT_PATH . '/public/includes/footer.php'; ?>
+    </div>
 
-      <section class="content">
-        <?php
-        // Carga segura y dinámica de páginas desde /paginas/
-        $carpeta_paginas = ROOT_PATH . '/public/paginas/';
-        $pagina_predeterminada = 'insignias.php';
-
-        $archivos_permitidos = array_filter(scandir($carpeta_paginas), function($archivo) {
-          return pathinfo($archivo, PATHINFO_EXTENSION) === 'php';
-        });
-
-        $paginas_validas = array_map(function($archivo) {
-          return basename($archivo, '.php');
-        }, $archivos_permitidos);
-
-        $pagina = isset($_GET['pagina']) ? basename($_GET['pagina']) : basename($pagina_predeterminada, '.php');
-
-        if (in_array($pagina, $paginas_validas) && file_exists($carpeta_paginas . $pagina . '.php')) {
-          include $carpeta_paginas . $pagina . '.php';
-        } else {
-          include $carpeta_paginas . '404.php';
-        }
-        ?>
-      </section>
-    </main>
-  <?php } ?>
-  <?php // ✅ FIN DE LA MODIFICACIÓN ?>
-    <?php include ROOT_PATH . '/public/includes/footer.php'; ?>
+    <script> const BASE_URL = '<?= BASE_URL; ?>'; </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="<?= BASE_URL; ?>assets/js/logs_viewer.js?v=<?= time(); ?>"></script>
 </body>
 </html>

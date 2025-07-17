@@ -1,22 +1,23 @@
 <?php
-// /config/api_keys.php
+
+// /config/api_keys.php (Versión depurada y segura)
 
 return [
-    // --- CLAVE PARA EL GENERADOR DE IMÁGENES (Hugging Face) ---
-    'hugging_face_token' => [
-		'api1',
-		'api2',
-	],
-    // --- Clave de OpenAI (la dejamos por si se usa en el futuro) ---
-    'openai_api_key' => '...',
-
-    // --- Claves para la API de Google AI (ahora un array de claves) ---
-    'google_ai_key' => [
-        'Key1', // Tu clave actual
-        'Key2', // Segunda clave
-        'Key3', // Tercera clave
-        // ... y así sucesivamente con más claves de tus otras cuentas
+    /**
+     * Claves para la API de Google Gemini.
+     * El sistema las rotará automáticamente si una falla.
+     */
+    'gemini' => [
+        'Key_1',
+        'Key_2',
     ],
-    'google_project_id' => 'biblioteca-sofia' // El Project ID suele ser el mismo, o si tienes varios proyectos, deberíamos adaptar esto. Por ahora, asumimos uno.
+
+    /**
+     * Claves para la API de Hugging Face (o Stable Diffusion).
+     * El sistema también las rotará.
+     */
+    'huggingface' => [
+        'Key_1',
+        'Key_2',
+    ],
 ];
-?>

@@ -1,10 +1,9 @@
 <?php
 //config/db.php
 
-$host = 'host';
-$user = '4540860_biblioteca';
+$host = 'db_host';
 $pass = 'pass';
-$db = '4540860_biblioteca'; // Según tu captura
+$db = 'db_name'; // Según tu captura
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";

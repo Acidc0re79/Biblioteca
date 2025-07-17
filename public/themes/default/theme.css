@@ -1,119 +1,149 @@
 /* ========================================= */
 /* TEMA POR DEFECTO - Biblioteca SYS         */
-/* Contiene todos los estilos visuales.      */
+/* Versión 2.0 - Refactorizado y Completo    */
 /* ========================================= */
 
 :root {
-  /* Paleta de Colores Principal */
-  --color-fondo-principal: linear-gradient(135deg, #1f2c3c, #3c2c4e);
-  --color-fondo-contenido: #2a2e39;
-  --color-fondo-elementos: #1a1a2e;
-  --color-texto-principal: #ffffff;
-  --color-texto-secundario: #cccccc;
-  --color-primario-acento: #ff0099;
-  --color-secundario-acento: #00d2ff;
-  --color-exito: #00c851;
-  --color-error: #c0392b;
-  --color-aviso: #ffc107;
-
-  /* NUEVO: Color para elementos "usados" en IA */
-  --color-usado-ia: #808080; /* Un gris medio para el tema por defecto (antes era #666666) */
+    /* Paleta de Colores Principal (Ajustada para Claridad) */
+    --color-fondo-principal: #f4f6f9; /* Un gris muy claro para el fondo general */
+    --color-fondo-contenido: #ffffff; /* Contenido principal en blanco puro */
+    --color-texto-principal: #212529; /* Texto principal oscuro (casi negro) */
+    --color-texto-secundario: #6c757d; /* Texto secundario gris */
+    --color-primario: #007bff; /* Azul primario de Bootstrap */
+    --color-secundario: #6c757d; /* Gris secundario */
+    --color-exito: #28a745; /* Verde */
+    --color-error: #dc3545; /* Rojo */
+    --color-aviso: #ffc107; /* Amarillo */
+    --color-borde-suave: #dee2e6; /* Para bordes y separadores */
 }
 
+/* --- ESTILOS GLOBALES --- */
 body {
-  background: var(--color-fondo-principal);
-  color: var(--color-texto-principal);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--color-fondo-principal);
+    color: var(--color-texto-principal);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* ========================================= */
-/* ESTILOS DEL HEADER                      */
-/* ========================================= */
+a {
+    color: var(--color-primario);
+    text-decoration: none;
+}
+a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* --- HEADER --- */
 .header {
-  background: #0d1117;
-  color: var(--color-secundario-acento);
-}
-.btn-header { background-color: var(--color-primario-acento); color: white; }
-.btn-header:hover { background-color: #e6008a; }
-.btn-header.btn-secondary { background-color: transparent; color: #f0f0f0; border-color: #f0f0f0; }
-.btn-header.btn-secondary:hover { background-color: #f0f0f0; color: #111; }
-.btn-header.btn-google { background-color: #ffffff; color: #444444; border-color: #dddddd; }
-.user-avatar { border-color: var(--color-secundario-acento); }
-.user-dropdown { background: var(--color-fondo-elementos); }
-.dropdown-link { color: var(--color-primario-acento); }
-.dropdown-link:hover { color: var(--color-secundario-acento); }
-
-/* ========================================= */
-/* ESTRUCTURA GENERAL                      */
-/* ========================================= */
-.main-nav { background: #191e29; }
-.main-nav a { color: #f0f0f0; }
-.main-nav a:hover { color: var(--color-primario-acento); }
-.sidebar { background: #111; }
-.sidebar h3 { color: var(--color-primario-acento); }
-.sidebar a { color: var(--color-texto-principal); }
-.sidebar a:hover { color: var(--color-secundario-acento); }
-.content { background: var(--color-fondo-contenido); }
-.site-footer { background: #111; color: #bbb; }
-.error-404 h1 { color: #ffa600; }
-.error-404 p { color: #ccc; }
-.error-404 .btn-error { background: var(--color-primario-acento); color: #fff; }
-.error-404 .btn-error:hover { background: var(--color-secundario-acento); color: #000; }
-
-/* ========================================= */
-/* ESTILOS DEL PERFIL Y MODAL (TEMA DEFAULT) */
-/* ========================================= */
-
-.perfil-box {
-  background: var(--color-fondo-elementos);
-  box-shadow: 0 0 15px rgba(0,0,0,0.5);
-}
-.perfil-box h2 { color: var(--color-primario-acento); }
-.perfil-avatar-overlay { background: rgba(0,0,0,0.5); }
-.icono-lapiz, .avatar-action-icon { color: white; }
-.btn-perfil { background-color: var(--color-primario-acento); color: white; }
-.btn-perfil:hover { background-color: var(--color-secundario-acento); color: #000; }
-
-/* Modal */
-.modal-overlay { background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
-.modal-contenido { background: var(--color-fondo-contenido); }
-.modal-close { color: #aaa; }
-.modal-close:hover { color: white; }
-
-/* --- ESTILOS DE PESTAÑAS MEJORADOS --- */
-.modal-tabs {
-    border-bottom: 1px solid #444;
-    padding-left: 1rem;
-}
-.tab-link {
-    color: #aaa;
-    opacity: 0.7;
-    background-color: #2a2e39; /* Un poco más claro que el fondo del contenido */
-    border: 1px solid #444;
-    border-bottom: none;
-    border-radius: 8px 8px 0 0;
-    margin-right: 5px;
-    position: relative;
-    top: 1px;
-}
-.tab-link:hover {
-    opacity: 1;
-    background-color: #3a3e49;
-}
-.tab-link.active {
-    color: white;
-    opacity: 1;
     background-color: var(--color-fondo-contenido);
-    border-color: #444;
-    border-bottom: 1px solid var(--color-fondo-contenido);
+    border-bottom: 1px solid var(--color-borde-suave);
+}
+.user-avatar {
+    border: 2px solid var(--color-primario);
+}
+.user-dropdown {
+    background-color: var(--color-fondo-contenido);
+    border: 1px solid var(--color-borde-suave);
+}
+.dropdown-link {
+    color: var(--color-texto-principal);
+}
+.dropdown-link:hover {
+    background-color: #f8f9fa;
 }
 
-.avatar-seleccionable.selected {
-  border-color: var(--color-secundario-acento);
-  box-shadow: 0 0 15px var(--color-secundario-acento);
+/* --- BARRA DE NAVEGACIÓN PRINCIPAL --- */
+.main-nav {
+    background-color: #343a40;
 }
-#formCrearAvatar select, #formCrearAvatar textarea {
-  background: #2e2e3e;
-  border: 1px solid #444;
-  color: white;
+.main-nav a {
+    color: rgba(255, 255, 255, 0.75);
 }
+.main-nav a:hover {
+    color: #ffffff;
+}
+
+/* --- PÁGINA DE PERFIL --- */
+.profile-container .card {
+    border: 1px solid var(--color-borde-suave);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* --- PÁGINA DE INSIGNIAS --- */
+.insignia-card {
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    color: var(--color-texto-principal);
+}
+.insignia-card:hover {
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+.categoria-titulo {
+    color: var(--color-texto-principal);
+    border-bottom: 1px solid var(--color-borde-suave);
+}
+.insignia-puntos {
+    color: var(--color-secundario);
+}
+/* Colores de Borde por Rareza */
+.rareza-común { border-color: #adb5bd; }
+.rareza-poco-común { border-color: #28a745; }
+.rareza-rara { border-color: #007bff; }
+.rareza-épica { border-color: #6f42c1; } /* Púrpura */
+.rareza-legendaria { border-color: #fd7e14; } /* Naranja */
+
+
+/* --- MODALES (Estilo General para Bootstrap) --- */
+/* Bootstrap maneja la mayoría de los estilos del modal.
+   Aquí solo ajustamos colores si es necesario, pero
+   usar las clases de Bootstrap es más que suficiente
+   para el tema claro. No necesitamos reglas extra complejas. */
+
+/* --- FORMULARIOS (Para login_form, etc.) --- */
+.form-wrapper {
+    background: var(--color-fondo-contenido);
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.form-toggle button {
+    color: var(--color-texto-secundario);
+}
+.form-toggle button.active {
+    color: var(--color-primario);
+    border-bottom: 2px solid var(--color-primario);
+}
+.form-box h2 {
+    color: var(--color-texto-principal);
+}
+.form-box .btn {
+    background-color: var(--color-primario);
+    color: #fff;
+}
+.form-box .btn:hover {
+    background-color: #0069d9;
+}
+.google-btn {
+    background-color: #fff;
+    color: #444;
+    border: 1px solid var(--color-borde-suave);
+}
+.google-btn:hover {
+    background-color: #f8f9fa;
+}
+
+/* --- FOOTER --- */
+.site-footer {
+    background-color: #343a40;
+    color: rgba(255, 255, 255, 0.7);
+}
+.site-footer a {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* ------------------------------------------------------------- */
+/* NOTA: Las reglas antiguas con nombres como .perfil-box,       */
+/* .modal-overlay, etc., han sido eliminadas porque ahora        */
+/* usamos las clases de Bootstrap (.card, .modal) y la estructura*/
+/* de los archivos CSS de estructura para el layout. Esto hace  */
+/* que el tema sea más limpio y fácil de mantener.               */
+/* ------------------------------------------------------------- */

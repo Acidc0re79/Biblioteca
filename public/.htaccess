@@ -1,4 +1,4 @@
-# /.htaccess (Versión Final y Robusta)
+# /.htaccess (Versión con Sintaxis Corregida)
 
 # Activar el motor de reescritura de URLs
 RewriteEngine On
@@ -15,6 +15,7 @@ RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 Options -Indexes
 
 # Proteger archivos sensibles de ser accedidos desde la web
+# (Con espacios normales)
 <FilesMatch "\.(htaccess|env|git|sql|bak|ini|log|sh|key)$">
   Order allow,deny
   Deny from all
@@ -23,25 +24,23 @@ Options -Indexes
 # ----------------------------------------------------
 # SECCIÓN 2: ENRUTAMIENTO INTELIGENTE
 # ----------------------------------------------------
-# Esta es la lógica principal que soluciona nuestro problema.
+# Lógica de enrutamiento original, que es correcta.
 
 # Condición 1: No aplicar la regla si la petición es para un directorio existente.
 RewriteCond %{REQUEST_FILENAME} !-d
 # Condición 2: No aplicar la regla si la petición es para un archivo existente.
-# ESTA ES LA LÍNEA CLAVE que permite el acceso a form-handler.php y ajax-handler.php
 RewriteCond %{REQUEST_FILENAME} !-f
 
-# Regla: Si ninguna de las condiciones anteriores se cumple,
-# entonces reescribe silenciosamente la petición a /public/index.php
-# y pasa la URL original como un parámetro.
+# Regla: Si las condiciones anteriores se cumplen, reescribe a /public/index.php
 RewriteRule ^(.*)$ /public/index.php?url=$1 [QSA,L]
 
 # ----------------------------------------------------
-# SECCIÓN 3: CACHEO (sin cambios)
+# SECCIÓN 3: CACHEO
 # ----------------------------------------------------
+# (Con espacios normales)
 <IfModule mod_expires.c>
   ExpiresActive On
   ExpiresByType image/jpg "access plus 30 days"
   ExpiresByType image/jpeg "access plus 30 days"
-  # ... resto de tus reglas de cacheo ...
+  # ... asegúrate de que el resto de tus reglas de cacheo también usen espacios normales ...
 </IfModule>

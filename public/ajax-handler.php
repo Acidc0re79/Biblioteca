@@ -1,46 +1,40 @@
 <?php
-// /public/ajax-handler.php (Versión con las nuevas acciones)
+// 1. Carga la configuración y el entorno de la aplicación.
+require_once __DIR__ . '/../config/init.php';
 
-define('ROOT_PATH', dirname(__DIR__));
-require_once ROOT_PATH . '/config/init.php';
+// 2. Establece el tipo de contenido de la respuesta a JSON.
+// Todas las respuestas AJAX de este manejador serán en formato JSON.
+header('Content-Type: application/json');
 
-$input = json_decode(file_get_contents('php://input'), true);
+// 3. Obtiene la acción solicitada.
+$action = $_POST['action'] ?? $_GET['action'] ?? '';
 
-if (empty($input['action'])) {
-    header('Content-Type: application/json');
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Error: Acción no especificada.']);
-    exit;
-}
-
-$action = $input['action'];
-$payload = $input['payload'] ?? [];
-
-// Lista actualizada de acciones permitidas
+// 4. Define una lista blanca de acciones AJAX permitidas.
 $allowed_actions = [
-    // Perfil
-    'actualizar_avatar'       => ROOT_PATH . '/utils/acciones/perfil/actualizar_avatar.php',
-    'eliminar_avatar_ia'      => ROOT_PATH . '/utils/acciones/perfil/eliminar_avatar_ia.php',
-    'crear_password'          => ROOT_PATH . '/utils/acciones/perfil/crear_password.php',
-    'ignorar_unificacion'     => ROOT_PATH . '/utils/acciones/perfil/ignorar_unificacion.php',
-    'limpiar_flag_sesion'     => ROOT_PATH . '/utils/acciones/perfil/limpiar_flag_sesion.php',
+    // Acciones de Perfil
+    'actualizar_perfil'   => ROOT_PATH . '/utils/acciones/perfil/actualizar_perfil.php',
+    'crear_password'      => ROOT_PATH . '/utils/acciones/perfil/crear_password.php',
+    'ignorar_unificacion' => ROOT_PATH . '/utils/acciones/perfil/ignorar_unificacion.php',
     
-    // IA
-    'generar_prompt_gemini'   => ROOT_PATH . '/utils/acciones/ia/generar_prompt_gemini.php',
-    'generar_avatar_ia'       => ROOT_PATH . '/utils/acciones/ia/generar_avatar_ia.php'
+    // Acciones de Avatares
+    'actualizar_avatar'   => ROOT_PATH . '/utils/acciones/perfil/actualizar_avatar.php',
+    'eliminar_avatar'     => ROOT_PATH . '/utils/acciones/perfil/eliminar_avatar_ia.php',
+    'generar_avatar_ia'   => ROOT_PATH . '/utils/acciones/ia/generar_avatar_ia.php',
 ];
 
+// 5. Verifica y ejecuta la acción.
 if (array_key_exists($action, $allowed_actions)) {
-    $script_path = $allowed_actions[$action];
-    if (file_exists($script_path)) {
-        $data = $payload; 
-        require_once $script_path;
-    } else {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error interno: Archivo de acción no encontrado.']);
-    }
+    // La seguridad principal (verificar si el usuario está logueado, etc.)
+    // debe estar DENTRO de cada script de acción.
+    require_once $allowed_actions[$action];
 } else {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Error: Acción no permitida.']);
+    // Si la acción no es válida, registra el error y devuelve una respuesta JSON.
+    log_system_event("ajax-handler.php: Se recibió una acción no válida.", ['accion_recibida' => $action]);
+    
+    // Devolvemos una respuesta de error en formato JSON estandarizado.
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'La acción solicitada no es válida.'
+    ]);
+    exit;
 }
-?>

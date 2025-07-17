@@ -1,80 +1,111 @@
 <?php
-// /utils/acciones/auth/google_callback.php (Versión con verificación de preferencia)
-
-require_once ROOT_PATH . '/config/init.php';
-global $pdo;
-$google_config = require ROOT_PATH . '/config/google_config.php';
-
-if (empty($_GET['code'])) {
-    header('Location: /index.php?pagina=login_form&error=google_code');
+if (!isset($_GET['code'])) {
+    // Use the NEW debug function
+    log_system_event("Google Callback: No se recibió el 'code' de autorización.");
+    $_SESSION['error_message'] = "Error de autenticación: no se recibió el código de Google.";
+    header('Location: ' . BASE_URL . 'index.php?p=login_form');
     exit;
 }
 
-function establecerSesionCompleta($usuario_info) {
-    if (session_status() === PHP_SESSION_NONE) { session_start(); }
-    session_unset();
-    $_SESSION['usuario_id']    = $usuario_info['id_usuario'];
-    $_SESSION['nombre']        = $usuario_info['nombre'];
-    $_SESSION['apellido']      = $usuario_info['apellido'];
-    $_SESSION['email']         = $usuario_info['email'];
-    $_SESSION['estado_cuenta'] = $usuario_info['estado_cuenta'];
-    $_SESSION['rango']         = $usuario_info['rango'];
-    $_SESSION['tema']          = $usuario_info['tema'];
-    session_write_close();
-}
-
 try {
-    // ... (El código para obtener el token y el perfil de Google no cambia)
+    // --- 1. Exchange authorization code for access token ---
     $token_endpoint = 'https://oauth2.googleapis.com/token';
-    $token_params = [ 'code' => $_GET['code'], 'client_id' => $google_config['client_id'], 'client_secret' => $google_config['client_secret'], 'redirect_uri' => $google_config['redirect_uri'], 'grant_type' => 'authorization_code' ];
-    $curl = curl_init($token_endpoint);
-    curl_setopt_array($curl, [ CURLOPT_POST => true, CURLOPT_POSTFIELDS => http_build_query($token_params), CURLOPT_RETURNTRANSFER => true, CURLOPT_SSL_VERIFYPEER => true, CURLOPT_CONNECTTIMEOUT => 15, CURLOPT_TIMEOUT => 30 ]);
-    $token_response = curl_exec($curl);
-    if (curl_errno($curl)) { throw new Exception('Error de cURL: ' . curl_error($curl)); }
-    curl_close($curl);
-    $token_data = json_decode($token_response, true);
-    if (empty($token_data['access_token'])) { throw new Exception('Google no devolvió un token de acceso.'); }
+    $token_params = [
+        'code' => $_GET['code'],
+        'client_id' => GOOGLE_CLIENT_ID,
+        'client_secret' => GOOGLE_CLIENT_SECRET,
+        'redirect_uri' => GOOGLE_REDIRECT_URI,
+        'grant_type' => 'authorization_code'
+    ];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $token_endpoint);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($token_params));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $token_data = json_decode($response, true);
+
+    if (isset($token_data['error'])) {
+        throw new Exception('Error al obtener token de Google: ' . ($token_data['error_description'] ?? 'Error desconocido'));
+    }
+
     $access_token = $token_data['access_token'];
 
+    // --- 2. Use access token to get user profile info ---
     $userinfo_endpoint = 'https://www.googleapis.com/oauth2/v3/userinfo';
-    $curl_user = curl_init($userinfo_endpoint);
-    curl_setopt_array($curl_user, [ CURLOPT_RETURNTRANSFER => true, CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $access_token] ]);
-    $userinfo_response = curl_exec($curl_user);
-    curl_close($curl_user);
-    $perfil = json_decode($userinfo_response, true);
-    if (empty($perfil['email'])) { throw new Exception('Google no devolvió un perfil válido.'); }
-
-    // --- Lógica de usuario (sin cambios) ---
-    $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = :email LIMIT 1");
-    $stmt->execute(['email' => $perfil['email']]);
-    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$usuario) {
-        $stmt_insert = $pdo->prepare("INSERT INTO usuarios (nombre, apellido, email, proveedor_oauth, oauth_id, avatar_google, estado_cuenta, rango) VALUES (:nombre, :apellido, :email, 'google', :oauth_id, :avatar_google, 'activo', 'lector')");
-        $stmt_insert->execute(['nombre' => $perfil['given_name'], 'apellido' => $perfil['family_name'] ?? '', 'email' => $perfil['email'], 'oauth_id' => $perfil['sub'], 'avatar_google' => $perfil['picture']]);
-        $id_nuevo_usuario = $pdo->lastInsertId();
-        $stmt_new = $pdo->prepare("SELECT * FROM usuarios WHERE id_usuario = ?");
-        $stmt_new->execute([$id_nuevo_usuario]);
-        $usuario = $stmt_new->fetch(PDO::FETCH_ASSOC);
-    } else {
-        $stmt_update = $pdo->prepare("UPDATE usuarios SET avatar_google = ? WHERE id_usuario = ?");
-        $stmt_update->execute([$perfil['picture'], $usuario['id_usuario']]);
-    }
-
-    // --- LÓGICA DE UNIFICACIÓN FINAL ---
-    establecerSesionCompleta($usuario);
     
-    if (empty($usuario['hash_password']) && $usuario['ignorar_unificacion_pwd'] == 0) {
-        session_start();
-        $_SESSION['password_creation_required'] = true;
-        session_write_close();
-        header("Location: /index.php?pagina=perfil");
-        exit;
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $userinfo_endpoint);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $access_token]);
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $profile_data = json_decode($response, true);
+
+    // --- 3. Find or create the user in the database ---
+    $email = $profile_data['email'];
+    $google_id = $profile_data['sub'];
+
+    $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ? OR oauth_id = ?");
+    $stmt->execute([$email, $google_id]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($user) {
+        // Use the NEW debug function
+        log_system_event("Google Login: Usuario existente encontrado.", ['id_usuario' => $user['id_usuario'], 'email' => $email]);
+        if (empty($user['oauth_id'])) {
+            $update_stmt = $pdo->prepare("UPDATE usuarios SET oauth_id = ? WHERE id_usuario = ?");
+            $update_stmt->execute([$google_id, $user['id_usuario']]);
+            log_system_event("Cuenta local unificada con Google.", ['id_usuario' => $user['id_usuario']]);
+        }
     } else {
-        header("Location: /index.php");
-        exit;
+        $stmt_insert = $pdo->prepare(
+            "INSERT INTO usuarios (nombre, apellido, email, proveedor_oauth, oauth_id, avatar_google, estado_cuenta, rango, fecha_nacimiento) 
+             VALUES (?, ?, ?, 'google', ?, ?, 'activo', 'lector', NOW())" // Added NOW() for fecha_nacimiento
+        );
+        $stmt_insert->execute([$profile_data['given_name'], $profile_data['family_name'] ?? '', $email, $google_id, $profile_data['picture']]);
+        
+        $user_id = $pdo->lastInsertId();
+        $stmt_new = $pdo->prepare("SELECT * FROM usuarios WHERE id_usuario = ?");
+        $stmt_new->execute([$user_id]);
+        $user = $stmt_new->fetch();
+        // Use the NEW debug function
+        log_system_event("Google Login: Nuevo usuario creado.", ['id_usuario' => $user_id, 'email' => $email]);
     }
+
+    // --- 4. Final check and session creation ---
+    if ($user['estado_cuenta'] !== 'activo') {
+        throw new Exception("Tu cuenta se encuentra en estado '{$user['estado_cuenta']}'. Contacta con un administrador.");
+    }
+
+    session_regenerate_id(true);
+
+    $_SESSION['user_id'] = $user['id_usuario'];
+    $_SESSION['nombre'] = $user['nombre'];
+    $_SESSION['apellido'] = $user['apellido'];
+    $_SESSION['email'] = $user['email'];
+    $_SESSION['rango'] = $user['rango'];
+    $_SESSION['tema'] = $user['tema'];
+
+    if (empty($user['hash_password']) && !$user['ignorar_unificacion_pwd']) {
+        $_SESSION['password_creation_required'] = true;
+        // Use the NEW debug function
+        log_system_event("Flag 'password_creation_required' activado.", ['id_usuario' => $user['id_usuario']]);
+    }
+
+    // Use the NEW debug function
+    log_system_event("Login con Google exitoso.", ['id_usuario' => $user['id_usuario']]);
+    header('Location: ' . BASE_URL . 'index.php?p=perfil');
+    exit;
 
 } catch (Exception $e) {
-    die('Error fatal durante la autenticación con Google: ' . $e->getMessage());
+    // Use the NEW debug function
+    log_system_event("Error CRÍTICO en google_callback.php.", ['error_message' => $e->getMessage()]);
+    $_SESSION['error_message'] = $e->getMessage();
+    header('Location: ' . BASE_URL . 'index.php?p=login_form');
+    exit;
 }
-?>

@@ -1,0 +1,54 @@
+.logs-section .card-header {
+    font-weight: bold;
+}
+.log-card {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-family: 'Courier New', Courier, monospace;
+}
+.log-card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background-color: #e9ecef;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid #dee2e6;
+}
+.log-timestamp {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+.log-chip {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #fff;
+}
+.log-debug { background-color: #0d6efd; }
+.log-error { background-color: #dc3545; }
+.log-default { background-color: #6c757d; }
+.log-card-header .copy-btn {
+    margin-left: auto;
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.log-card-header .copy-btn:hover { background-color: #0b5ed7; }
+.log-card-header .copy-btn.copied { background-color: #198754; }
+.log-card-body { padding: 1.25rem; }
+.log-card-body p { margin-top: 0; margin-bottom: 0.5rem; }
+.log-card-body pre {
+    background-color: #212529;
+    color: #ced4da;
+    padding: 1rem;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}

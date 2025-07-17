@@ -1,35 +1,43 @@
 <?php
-// /utils/debug_helper.php
+// /utils/debug_helper.php (Versión 3 - Escribe en JSON)
 
-// Esta función se usará para registrar mensajes de depuración condicionalmente.
-// Si DEBUG_MODE es true, el mensaje se escribirá en el log de errores del servidor.
-// Opcionalmente, si $to_browser es true y no se han enviado cabeceras, intentará imprimir en el navegador (¡usar con precaución en APIs!).
-function syslr_debug_log($message, $to_browser = false) {
-    if (defined('DEBUG_MODE') && DEBUG_MODE === true) {
-        // Siempre escribir en el log de errores del servidor
-        error_log("[DEBUG] " . $message);
-
-        // Imprimir en el navegador solo si se solicita y no se han enviado cabeceras (para evitar errores)
-        if ($to_browser && !headers_sent()) {
-            echo "<pre>[DEBUG BROWSER] " . htmlspecialchars($message) . "</pre>";
-        }
+/**
+ * Registra un evento del sistema en un archivo JSON si el modo de depuración está activado.
+ *
+ * @param string $message El mensaje principal del evento.
+ * @param array $context Un array asociativo con datos adicionales.
+ */
+function log_system_event($message, $context = [])
+{
+    if (!defined('DEBUG_MODE') || DEBUG_MODE !== true) {
+        return; // No hacer nada si el modo de depuración está apagado.
     }
+
+    // LOG_PATH debe ser definida en init.php (ej. ROOT_PATH . '/logs/')
+    if (!defined('LOG_PATH')) {
+        // Fallback por si acaso, aunque no debería ocurrir.
+        define('LOG_PATH', dirname(__DIR__, 2) . '/logs/');
+    }
+
+    $log_file = LOG_PATH . 'system_debug.json';
+    $log_dir = dirname($log_file);
+
+    // Crea el directorio de logs si no existe.
+    if (!is_dir($log_dir)) {
+        // 0775 da permisos completos al propietario y grupo, y de lectura/ejecución a otros.
+        mkdir($log_dir, 0775, true);
+    }
+
+    $new_log_entry = [
+        'timestamp' => date('Y-m-d H:i:s'),
+        'level'     => 'DEBUG',
+        'message'   => $message,
+        'context'   => $context
+    ];
+
+    // Convertimos la nueva entrada a una cadena JSON y añadimos un salto de línea.
+    $log_line = json_encode($new_log_entry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . PHP_EOL;
+
+    // Añadimos la nueva línea al final del archivo. FILE_APPEND evita sobreescribir.
+    file_put_contents($log_file, $log_line, FILE_APPEND);
 }
-
-// Opcional: Función para iniciar un buffer de salida si necesitas imprimir mucho debug en el navegador desde un script que normalmente envía JSON
-// function syslr_start_debug_buffer() {
-//     if (defined('DEBUG_MODE') && DEBUG_MODE === true && !headers_sent()) {
-//         ob_start();
-//     }
-// }
-
-// Opcional: Función para finalizar y enviar/limpiar el buffer de depuración
-// function syslr_end_debug_buffer($send_to_browser = false) {
-//     if (defined('DEBUG_MODE') && DEBUG_MODE === true && ob_get_level() > 0) {
-//         if ($send_to_browser) {
-//             ob_end_flush(); // Enviar el contenido del buffer al navegador
-//         } else {
-//             ob_end_clean(); // Limpiar el buffer sin enviarlo
-//         }
-//     }
-// }

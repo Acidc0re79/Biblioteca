@@ -1,23 +1,66 @@
-/* Reset básico y estructura principal del sitio */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { min-height: 100vh; display: flex; flex-direction: column; }
-.main-nav { padding: 0.5rem 2rem; }
-.main-nav ul { list-style: none; display: flex; gap: 2rem; flex-wrap: wrap; }
-.main-nav a { text-decoration: none; font-weight: bold; position: relative; padding: 10px 0; display: inline-block; }
-.layout { display: flex; flex: 1; min-height: 0; }
-.sidebar { width: 220px; padding: 1rem; transition: transform 0.3s ease-in-out; }
-.sidebar ul { list-style: none; }
-.sidebar a { display: block; padding: 0.6rem 0; text-decoration: none; }
-.content { flex: 1; padding: 2rem; overflow-y: auto; }
-.site-footer { padding: 1.5rem 2rem; text-align: center; font-size: 0.9rem; }
-.error-404 { text-align: center; padding: 4rem 2rem; }
-.error-404 .error-img { max-width: 220px; margin: 1rem auto; display: block; }
-.error-404 h1 { font-size: 2.5rem; margin-bottom: 1rem; }
-.error-404 p { font-style: italic; font-size: 1.1rem; margin: 1rem 0 2rem; line-height: 1.5; }
-.error-404 .error-buttons { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
-.error-404 .btn-error { padding: 0.8rem 1.5rem; display: inline-block; border-radius: 8px; text-decoration: none; font-weight: bold; }
-@media (max-width: 768px) {
-  .layout { flex-direction: column; }
-  .sidebar { transform: translateX(-100%); position: absolute; height: 100%; z-index: 999; }
-  .sidebar.active { transform: translateX(0); }
+/*
+========================================
+ESTRUCTURA.CSS
+Define el esqueleto principal y la disposición
+de los elementos clave de la página.
+========================================
+*/
+
+/* --- Configuración global y del cuerpo --- */
+html, body {
+  height: 100%; /* Asegura que el HTML y el Body ocupen toda la altura de la ventana */
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Una fuente limpia y moderna */
+}
+
+/* --- Contenedor Principal --- */
+/*
+  Este es el contenedor más importante. Usamos Flexbox para crear un diseño de columna
+  que ocupa toda la altura de la pantalla (height: 100vh).
+*/
+#main-container {
+  display: flex;
+  flex-direction: column; /* Apila los elementos (header, content, footer) verticalmente */
+  min-height: 100vh; /* Altura mínima igual a la altura de la ventana del navegador */
+}
+
+/* --- Envoltura del Contenido --- */
+/*
+  Este div envuelve el <main>. La propiedad 'flex: 1' es la clave:
+  le dice a este contenedor que "crezca" y ocupe todo el espacio vertical
+  disponible que dejen el header y el footer.
+*/
+#content-wrap {
+  flex: 1;
+  display: flex; /* Hacemos que también sea un contenedor flex para centrar el main */
+  flex-direction: column;
+}
+
+main.container-fluid {
+  flex-grow: 1; /* El contenido principal también crece para ocupar el espacio */
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+/* --- Pie de Página (Footer) --- */
+/*
+  El footer no necesita configuraciones complejas, ya que la estructura flex
+  de #main-container lo empujará naturalmente hacia abajo.
+  Le damos un poco de estilo para que se vea bien.
+*/
+.footer {
+  width: 100%;
+  flex-shrink: 0; /* Evita que el footer se encoja si el contenido es muy grande */
+  background-color: #f8f9fa; /* Un color de fondo suave, consistente con Bootstrap */
+  border-top: 1px solid #dee2e6; /* Una línea sutil para separarlo del contenido */
+}
+
+/* --- Clases de ayuda --- */
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  color: #6c757d;
 }

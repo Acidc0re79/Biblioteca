@@ -1,61 +1,60 @@
 <?php
-// /utils/acciones/admin/actualizar_usuario.php
-require_once ROOT_PATH . '/config/init.php';
+// Este script asume que form-handler.php ya cargó init.php
 
-// Verificación de seguridad: solo un admin puede ejecutar esto.
-if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['rol'] ?? '', ['administrador'])) {
-    die('Acceso no autorizado.');
+// Seguridad: Verificar que el usuario tenga rol de administrador
+if (!isset($_SESSION['user_id']) || $_SESSION['rango'] !== 'administrador') {
+    log_system_event("Intento de edición de usuario no autorizado.", ['usuario_intentando' => $_SESSION['user_id'] ?? 'No logueado']);
+    $_SESSION['error_message'] = "No tienes permisos para realizar esta acción.";
+    header('Location: ' . BASE_URL . 'admin/index.php?p=usuarios');
+    exit;
 }
 
-// Recogemos los datos del formulario
-$id_usuario_a_editar = $_POST['id_usuario'] ?? null;
-$nombre = $_POST['nombre'] ?? '';
-$apellido = $_POST['apellido'] ?? '';
-$rango = $_POST['rango'] ?? 'lector';
-$estado_cuenta = $_POST['estado_cuenta'] ?? 'pendiente';
-$puntos = $_POST['puntos'] ?? 0;
-$resetear_intentos = isset($_POST['resetear_intentos']);
-$nueva_password = $_POST['password'] ?? '';
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: ' . BASE_URL . 'admin/index.php?p=usuarios');
+    exit;
+}
 
-if (!$id_usuario_a_editar) {
-    die('Error: No se ha especificado un ID de usuario.');
+// Recoger y validar los datos
+$id_usuario_a_editar = filter_input(INPUT_POST, 'id_usuario', FILTER_VALIDATE_INT);
+$nuevo_rango = $_POST['rango'] ?? '';
+$nuevo_estado = $_POST['estado_cuenta'] ?? '';
+
+// Validar que los valores recibidos son los permitidos
+$rangos_permitidos = ['lector', 'moderador', 'administrador'];
+$estados_permitidos = ['pendiente', 'activo', 'suspendido', 'baneado'];
+
+if (!$id_usuario_a_editar || !in_array($nuevo_rango, $rangos_permitidos) || !in_array($nuevo_estado, $estados_permitidos)) {
+    $_SESSION['error_message'] = "Datos inválidos para la actualización.";
+    header('Location: ' . BASE_URL . 'admin/index.php?p=usuarios');
+    exit;
 }
 
 try {
-    // Construimos la consulta base
-    $sql = "UPDATE usuarios SET nombre = ?, apellido = ?, rango = ?, estado_cuenta = ?, puntos = ?";
-    $params = [$nombre, $apellido, $rango, $estado_cuenta, $puntos];
-
-    // Si se marcó la casilla de resetear intentos
-    if ($resetear_intentos) {
-        $sql .= ", intentos_avatar = 0";
+    $stmt = $pdo->prepare("UPDATE usuarios SET rango = ?, estado_cuenta = ? WHERE id_usuario = ?");
+    
+    if ($stmt->execute([$nuevo_rango, $nuevo_estado, $id_usuario_a_editar])) {
+        // Registro de éxito
+        log_system_event("Usuario actualizado exitosamente desde el panel.", [
+            'admin_id' => $_SESSION['user_id'],
+            'usuario_editado_id' => $id_usuario_a_editar,
+            'nuevos_datos' => ['rango' => $nuevo_rango, 'estado' => $nuevo_estado]
+        ]);
+        $_SESSION['success_message'] = "Usuario actualizado correctamente.";
+    } else {
+        // Registro de fallo
+        log_system_event("Error al intentar actualizar usuario desde el panel.", [
+            'admin_id' => $_SESSION['user_id'],
+            'usuario_a_editar_id' => $id_usuario_a_editar,
+            'error_info' => $stmt->errorInfo()
+        ]);
+        $_SESSION['error_message'] = "Error al actualizar el usuario.";
     }
-
-    // Si se proporcionó una nueva contraseña
-    if (!empty($nueva_password)) {
-        $pepper = trim(file_get_contents(ROOT_PATH . '/config/pepper.key'));
-        $salt = bin2hex(random_bytes(16));
-        $password_peppered = hash_hmac("sha256", $nueva_password, $pepper);
-        $hash = password_hash($password_peppered . $salt, PASSWORD_DEFAULT);
-
-        $sql .= ", hash_password = ?, salt = ?";
-        $params[] = $hash;
-        $params[] = $salt;
-    }
-
-    // Finalizamos la consulta
-    $sql .= " WHERE id_usuario = ?";
-    $params[] = $id_usuario_a_editar;
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-
-    // Redirigimos de vuelta a la lista de usuarios con un mensaje de éxito.
-    header("Location: /admin/usuarios.php?exito=edicion");
-    exit;
 
 } catch (PDOException $e) {
-    error_log("Error al actualizar usuario: " . $e->getMessage());
-    die("Error de base de datos al intentar actualizar el usuario.");
+    log_system_event("Excepción de BD al editar usuario.", ['error_message' => $e->getMessage()]);
+    $_SESSION['error_message'] = "Error de base de datos: " . $e->getMessage();
 }
+
+header('Location: ' . BASE_URL . 'admin/index.php?p=editar_usuario&id=' . $id_usuario_a_editar);
+exit;
 ?>

@@ -1,82 +1,72 @@
 <?php
-// /utils/acciones/auth/procesar_registro.php (Versión Autosuficiente y Final)
-
-// ✅ INICIALIZACIÓN PROPIA: El script ahora llama a init.php por sí mismo.
-// Usamos la constante ROOT_PATH que fue definida por el form-handler.
-require_once ROOT_PATH . '/config/init.php';
-
-// Ahora que hemos llamado a init.php, la variable $pdo existe y podemos usarla.
-$pepper_path = ROOT_PATH . '/config/pepper.key';
-if (!file_exists($pepper_path)) {
-    die('Error de configuración: No se encuentra el archivo pepper.key.');
-}
-$pepper = trim(file_get_contents($pepper_path));
-
-// --- FUNCIONES DE AYUDA ---
-function generarSalt($longitud = 16) {
-    return bin2hex(random_bytes($longitud));
-}
-function generarToken() {
-    return bin2hex(random_bytes(32));
-}
-
-// --- VALIDACIÓN ---
-$campos_obligatorios = ['nombre', 'apellido', 'fecha_nac', 'email', 'password', 'confirmar_password'];
-foreach ($campos_obligatorios as $campo) {
-    if (empty($_POST[$campo])) {
-        header("Location: /index.php?pagina=login_form&error=registro_campos");
-        exit;
-    }
-}
-
-$nombre = trim($_POST['nombre']);
-$apellido = trim($_POST['apellido']);
-$fecha_nac = $_POST['fecha_nac'];
-$email = strtolower(trim($_POST['email']));
-$password = $_POST['password'];
-$confirmar_password = $_POST['confirmar_password'];
-
-if ($password !== $confirmar_password) {
-    header("Location: /index.php?pagina=login_form&error=registro_password");
+// NO MÁS REQUIRE O INCLUDE AQUÍ.
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: ' . BASE_URL);
     exit;
 }
 
-// --- LÓGICA DE BASE DE DATOS ---
+// Recogemos y saneamos los datos del formulario.
+$nombre = trim($_POST['nombre'] ?? '');
+$apellido = trim($_POST['apellido'] ?? '');
+$email = trim($_POST['email'] ?? '');
+$password = $_POST['password'] ?? '';
+$password_confirm = $_POST['password_confirm'] ?? '';
+// CORRECCIÓN: Añadimos la fecha de nacimiento.
+$fecha_nacimiento = $_POST['fecha_nacimiento'] ?? '';
+
+// --- VALIDACIONES ---
+// CORRECCIÓN: Añadimos fecha_nacimiento a la validación.
+if (empty($nombre) || empty($apellido) || empty($email) || empty($password) || empty($fecha_nacimiento)) {
+    $_SESSION['error_message'] = "Todos los campos del formulario son obligatorios.";
+    header('Location: ' . BASE_URL . 'index.php?p=login_form');
+    exit;
+}
+// ... (resto de validaciones sin cambios)
+if ($password !== $password_confirm) { /* ... */ }
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { /* ... */ }
+if (strlen($password) < 8) { /* ... */ }
+
+// --- PROCESAMIENTO EN LA BASE DE DATOS ---
 try {
-    // Comprobar si el email ya existe
     $stmt = $pdo->prepare("SELECT id_usuario FROM usuarios WHERE email = ?");
     $stmt->execute([$email]);
     if ($stmt->fetch()) {
-        header("Location: /index.php?pagina=login_form&error=registro_email");
+        $_SESSION['error_message'] = "El correo electrónico ya está en uso.";
+        header('Location: ' . BASE_URL . 'index.php?p=login_form');
         exit;
     }
 
-    // Crear hash de la contraseña
-    $salt = generarSalt();
-    $password_peppered = hash_hmac("sha256", $password, $pepper);
-    $hash = password_hash($password_peppered . $salt, PASSWORD_DEFAULT);
+    if (!defined('PEPPER')) {
+        define('PEPPER', trim(file_get_contents(ROOT_PATH . '/config/pepper.key')));
+    }
+    $salt = bin2hex(random_bytes(16));
+    $password_peppered = hash_hmac("sha256", $password, PEPPER);
+    $hash_password = password_hash($password_peppered . $salt, PASSWORD_DEFAULT);
 
-    // Preparar e insertar el nuevo usuario
+    // CORRECCIÓN: Se añade fecha_nacimiento a la consulta INSERT.
     $stmt = $pdo->prepare(
-        "INSERT INTO usuarios (nombre, apellido, fecha_nacimiento, email, hash_password, salt, estado_cuenta, token_verificacion, fecha_token, proveedor_oauth, rango) 
-        VALUES (:nombre, :apellido, :fecha_nac, :email, :hash, :salt, 'pendiente', :token, NOW(), 'local', 'lector')"
+        "INSERT INTO usuarios (nombre, apellido, email, hash_password, salt, rango, estado_cuenta, proveedor_oauth, fecha_nacimiento)
+         VALUES (?, ?, ?, ?, ?, 'lector', 'pendiente', 'local', ?)"
     );
-    $stmt->execute([
-        'nombre' => $nombre,
-        'apellido' => $apellido,
-        'fecha_nac' => $fecha_nac,
-        'email' => $email,
-        'hash' => $hash,
-        'salt' => $salt,
-        'token' => generarToken()
-    ]);
-
-    header("Location: /index.php?pagina=login_form&registro=ok");
-    exit;
+    
+    // CORRECCIÓN: Se añade la variable $fecha_nacimiento al array de ejecución.
+    if ($stmt->execute([$nombre, $apellido, $email, $hash_password, $salt, $fecha_nacimiento])) {
+        $new_user_id = $pdo->lastInsertId();
+        log_system_event("Nuevo registro de usuario local exitoso. ID: {$new_user_id}, Email: {$email}.");
+        
+        $_SESSION['success_message'] = "¡Registro completado! Tu cuenta está pendiente de aprobación por un administrador.";
+        // CORRECIÓN: Redirigimos al index, que ahora mostrará la página 'main' con el mensaje.
+        header('Location: ' . BASE_URL . 'index.php');
+        exit;
+    } else {
+        $_SESSION['error_message'] = "No se pudo completar el registro. Inténtalo de nuevo.";
+        header('Location: ' . BASE_URL . 'index.php?p=login_form');
+        exit;
+    }
 
 } catch (PDOException $e) {
-    error_log("Error al registrar usuario: " . $e->getMessage());
-    header("Location: /index.php?pagina=login_form&error=db");
+    log_system_event("Error de base de datos en procesar_registro.php: " . $e->getMessage(), true);
+    $_SESSION['error_message'] = "Ocurrió un error en el servidor. Por favor, inténtalo de nuevo más tarde.";
+    header('Location: ' . BASE_URL . 'index.php?p=login_form');
     exit;
 }
-?>

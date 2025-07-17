@@ -1,57 +1,54 @@
 <?php
-// /utils/acciones/admin/eliminar_usuario.php
-require_once ROOT_PATH . '/config/init.php';
+// Este script asume que form-handler.php ya cargó init.php
 
-// Verificación de seguridad: solo un admin puede ejecutar esto.
-if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['rol'] ?? '', ['administrador'])) {
-    die('Acceso no autorizado.');
+// Seguridad: Verificar que el usuario tenga rol de administrador
+if (!isset($_SESSION['user_id']) || $_SESSION['rango'] !== 'administrador') {
+    log_system_event("Intento de eliminación de usuario no autorizado.", ['usuario_intentando' => $_SESSION['user_id'] ?? 'No logueado']);
+    $_SESSION['error_message'] = "No tienes permisos para realizar esta acción.";
+    header('Location: ' . BASE_URL . 'admin/index.php?p=usuarios');
+    exit;
 }
 
-// Obtenemos el ID del usuario a eliminar
-$id_usuario_a_eliminar = $_POST['id_usuario'] ?? null;
-
-if (!$id_usuario_a_eliminar) {
-    die('Error: No se ha especificado un ID de usuario para eliminar.');
+if (!isset($_POST['id_usuario']) || empty($_POST['id_usuario'])) {
+    $_SESSION['error_message'] = "No se proporcionó un ID de usuario para eliminar.";
+    header('Location: ' . BASE_URL . 'admin/index.php?p=usuarios');
+    exit;
 }
 
-// Por seguridad, un administrador no puede eliminarse a sí mismo.
-if ($id_usuario_a_eliminar == $_SESSION['usuario_id']) {
-    die('Error: No puedes eliminar tu propia cuenta de administrador desde aquí.');
+$id_usuario_a_eliminar = filter_input(INPUT_POST, 'id_usuario', FILTER_VALIDATE_INT);
+
+// Seguridad: Un administrador no puede eliminarse a sí mismo.
+if ($id_usuario_a_eliminar === (int)$_SESSION['user_id']) {
+    $_SESSION['error_message'] = "No puedes eliminar tu propia cuenta desde el panel.";
+    header('Location: ' . BASE_URL . 'admin/index.php?p=usuarios');
+    exit;
 }
 
 try {
-    // Iniciamos una transacción. Si algo falla, todo se revierte.
-    $pdo->beginTransaction();
-
-    // 1. Eliminar archivos físicos (avatares generados)
-    $stmt_avatares = $pdo->prepare("SELECT nombre_archivo FROM usuarios_avatares WHERE id_usuario = ?");
-    $stmt_avatares->execute([$id_usuario_a_eliminar]);
-    $avatares_a_borrar = $stmt_avatares->fetchAll(PDO::FETCH_COLUMN);
-
-    foreach ($avatares_a_borrar as $nombre_archivo) {
-        $ruta_full = ROOT_PATH . '/public/assets/img/avatars/users/' . $nombre_archivo;
-        $ruta_thumb = ROOT_PATH . '/public/assets/img/avatars/thumbs/users/' . $nombre_archivo;
-        if (file_exists($ruta_full)) { @unlink($ruta_full); }
-        if (file_exists($ruta_thumb)) { @unlink($ruta_thumb); }
+    $stmt = $pdo->prepare("DELETE FROM usuarios WHERE id_usuario = ?");
+    
+    if ($stmt->execute([$id_usuario_a_eliminar])) {
+        // Registro de éxito
+        log_system_event("Usuario eliminado exitosamente desde el panel.", [
+            'admin_id' => $_SESSION['user_id'],
+            'usuario_eliminado_id' => $id_usuario_a_eliminar
+        ]);
+        $_SESSION['success_message'] = "Usuario eliminado correctamente.";
+    } else {
+        // Registro de fallo
+        log_system_event("Error al intentar eliminar usuario desde el panel.", [
+            'admin_id' => $_SESSION['user_id'],
+            'usuario_a_eliminar_id' => $id_usuario_a_eliminar,
+            'error_info' => $stmt->errorInfo()
+        ]);
+        $_SESSION['error_message'] = "Error al eliminar el usuario.";
     }
 
-    // 2. Eliminar registros de la base de datos en cascada
-    // (Gracias a las claves foráneas con ON DELETE CASCADE, solo necesitamos borrar de la tabla principal.
-    // Si no las tuviéramos, tendríamos que borrar de usuarios_avatares, usuarios_insignias, etc., primero)
-    $stmt_delete_user = $pdo->prepare("DELETE FROM usuarios WHERE id_usuario = ?");
-    $stmt_delete_user->execute([$id_usuario_a_eliminar]);
-
-    // 3. Si todo fue bien, confirmamos la transacción
-    $pdo->commit();
-
-    // Redirigimos de vuelta a la lista con un mensaje de éxito.
-    header("Location: /admin/usuarios.php?exito=eliminacion");
-    exit;
-
 } catch (PDOException $e) {
-    // Si algo falla, revertimos todos los cambios.
-    $pdo->rollBack();
-    error_log("Error al eliminar usuario: " . $e->getMessage());
-    die("Error de base de datos al intentar eliminar el usuario.");
+    log_system_event("Excepción de BD al eliminar usuario.", ['error_message' => $e->getMessage()]);
+    $_SESSION['error_message'] = "Error de base de datos: " . $e->getMessage();
 }
+
+header('Location: ' . BASE_URL . 'admin/index.php?p=usuarios');
+exit;
 ?>

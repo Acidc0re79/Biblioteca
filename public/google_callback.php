@@ -1,10 +1,11 @@
 <?php
-// /public/google_callback.php (Versión Final y Directa)
+// /public/google_callback.php (Versión Final Segura)
 
-// 1. Inicializamos la aplicación para tener acceso a todo lo necesario.
-// Usamos dirname(__DIR__) para subir desde /public a la raíz del proyecto.
-require_once dirname(__DIR__) . '/config/init.php';
+// 1. Cargamos el entorno de la aplicación.
+// Esta línea es todo lo que necesita para tener acceso a la base de datos,
+// constantes, y configuraciones.
+require_once __DIR__ . '/../config/init.php';
 
-// 2. Una vez inicializado, llamamos directamente al script de lógica segura.
+// 2. Una vez inicializado, llamamos al script de lógica segura que contiene
+// todas las dinámicas y parámetros específicos para manejar la respuesta de Google.
 require_once ROOT_PATH . '/utils/acciones/auth/google_callback.php';
-?>
