@@ -1,24 +1,9 @@
 <?php
-$success_message = $_SESSION['success_message'] ?? null;
-$error_message = $_SESSION['error_message'] ?? null;
-unset($_SESSION['success_message'], $_SESSION['error_message']);
+// Se han eliminado los mensajes de sesión de la parte superior para unificar
+// la gestión de notificaciones en el futuro.
 
-// Función para leer archivos de log que son JSON línea por línea
-function get_logs_from_file($logName) {
-    $logPath = ROOT_PATH . '/logs/' . $logName;
-    $logs = [];
-    if (file_exists($logPath)) {
-        $log_lines = file($logPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        foreach ($log_lines as $line) {
-            $decoded_line = json_decode($line, true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                $logs[] = $decoded_line;
-            }
-        }
-        return array_reverse($logs); // Mostrar los más recientes primero
-    }
-    return $logs;
-}
+// La función para leer logs y toda la lógica de la consola de depuración
+// han sido completamente eliminadas de este archivo público.
 ?>
 <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/logs_viewer.css?v=<?php echo time(); ?>">
 
@@ -30,42 +15,18 @@ function get_logs_from_file($logName) {
         </div>
     </div>
 
-    <?php if ($success_message): ?>
-        <div class="alert alert-success" role="alert"><?= htmlspecialchars($success_message) ?></div>
+    <?php
+    // Mantenemos la lógica para mostrar mensajes de éxito o error al usuario
+    // que son redirigidos aquí.
+    if (isset($_SESSION['success_message'])): ?>
+        <div class="alert alert-success" role="alert"><?= htmlspecialchars($_SESSION['success_message']) ?></div>
+        <?php unset($_SESSION['success_message']); ?>
     <?php endif; ?>
-    <?php if ($error_message): ?>
-        <div class="alert alert-danger" role="alert"><?= htmlspecialchars($error_message) ?></div>
+    <?php if (isset($_SESSION['error_message'])): ?>
+        <div class="alert alert-danger" role="alert"><?= htmlspecialchars($_SESSION['error_message']) ?></div>
+        <?php unset($_SESSION['error_message']); ?>
     <?php endif; ?>
 
-    <?php if (defined('DEBUG_MODE') && DEBUG_MODE === true): ?>
-        <div class="card mt-4 logs-section">
-            <h5 class="card-header">Consola de Depuración Activa</h5>
-            <div class="card-body">
-                <?php $system_logs = get_logs_from_file('system_debug.json'); ?>
-                <?php if (empty($system_logs)): ?>
-                    <p>El log del sistema está vacío.</p>
-                <?php else: ?>
-                    <?php foreach ($system_logs as $index => $log): ?>
-                        <div class="log-card">
-                            <div class="log-card-header">
-                                <span class="log-chip log-<?= strtolower($log['level'] ?? 'default') ?>">
-                                    <?= strtoupper($log['level'] ?? 'LOG') ?>
-                                </span>
-                                <span class="log-timestamp"><?= $log['timestamp'] ?? '' ?></span>
-                                <button class="copy-btn" data-target="log-content-<?= $index ?>">Copiar</button>
-                            </div>
-                            <div class="log-card-body">
-                                <p><strong><?= htmlspecialchars($log['message'] ?? 'Mensaje no disponible') ?></strong></p>
-                                <?php if (!empty($log['context'])): ?>
-                                <pre id="log-content-<?= $index ?>"><?= htmlspecialchars(json_encode($log['context'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) ?></pre>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-        </div>
-    <?php endif; ?>
 </div>
 
 <script src="<?php echo BASE_URL; ?>assets/js/logs_viewer.js?v=<?php echo time(); ?>"></script>

@@ -1,61 +1,63 @@
 <?php
-// /config/init.php (Versión 2, Corregida sin Composer)
+// /config/init.php (Versión 3.1, con parser de .env mejorado)
 
-// Iniciar la sesión solo si no hay una activa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Se define la constante ROOT_PATH solo si no ha sido definida antes.
 if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', dirname(__DIR__));
 }
 
-// --- CARGA DE CONFIGURACIONES Y HELPERS ESENCIALES ---
+// --- FUNCIÓN PARA CARGAR EL .ENV ---
+function load_environment_variables($path) {
+    if (!is_readable($path)) {
+        throw new RuntimeException(sprintf('%s file is not readable', $path));
+    }
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) continue;
+        list($name, $value) = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value, '"');
+        if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
+            putenv(sprintf('%s=%s', $name, $value));
+            $_ENV[$name] = $value;
+            $_SERVER[$name] = $value;
+        }
+    }
+}
 
-// Incluimos la conexión a la base de datos para que $pdo esté disponible globalmente.
+try {
+    load_environment_variables(ROOT_PATH . '/.env');
+} catch (RuntimeException $e) {
+    die("Error crítico: No se puede leer el archivo de configuración .env. Asegúrate de que exista en la raíz del proyecto.");
+}
+
+// --- CONSTANTES DE SEGURIDAD Y APIS ---
+if (!defined('PEPPER')) define('PEPPER', getenv('APP_PEPPER'));
+if (!defined('GOOGLE_CLIENT_ID')) define('GOOGLE_CLIENT_ID', getenv('GOOGLE_CLIENT_ID'));
+if (!defined('GOOGLE_CLIENT_SECRET')) define('GOOGLE_CLIENT_SECRET', getenv('GOOGLE_CLIENT_SECRET'));
+if (!defined('GOOGLE_REDIRECT_URI')) define('GOOGLE_REDIRECT_URI', getenv('GOOGLE_REDIRECT_URI'));
+
+// ✅ MEJORA: Usamos array_map('trim', ...) para eliminar espacios en blanco de cada clave.
+if (!defined('GEMINI_API_KEYS')) define('GEMINI_API_KEYS', array_map('trim', explode(',', getenv('GEMINI_API_KEYS'))));
+
+if (!defined('HUGGINGFACE_API_KEY')) define('HUGGINGFACE_API_KEY', getenv('HUGGINGFACE_API_KEY'));
+
+// --- CONEXIÓN A BASE DE DATOS Y HELPERS ---
 require_once ROOT_PATH . '/config/db.php';
-
-// Incluimos el helper de depuración para que esté disponible en todo el sitio.
 require_once ROOT_PATH . '/utils/debug_helper.php';
-
-// Incluimos el helper de funciones generales.
 require_once ROOT_PATH . '/utils/helpers.php';
 
-// Incluimos las claves de API para que estén disponibles.
-$api_keys = require ROOT_PATH . '/config/api_keys.php';
 
-// Definimos las claves y el pepper como constantes para fácil acceso.
-if (!defined('GEMINI_API_KEYS')) {
-    define('GEMINI_API_KEYS', $api_keys['gemini']);
-}
-if (!defined('HUGGINGFACE_API_KEY')) {
-    define('HUGGINGFACE_API_KEY', $api_keys['huggingface'][0]);
-}
-if (!defined('PEPPER')) {
-    define('PEPPER', trim(file_get_contents(ROOT_PATH . '/config/pepper.key')));
-}
-
-// Cargamos la configuración de Google
-$google_config = require ROOT_PATH . '/config/google_config.php';
-if (!defined('GOOGLE_CLIENT_ID')) {
-    define('GOOGLE_CLIENT_ID', $google_config['client_id']);
-    define('GOOGLE_CLIENT_SECRET', $google_config['client_secret']);
-    define('GOOGLE_REDIRECT_URI', $google_config['redirect_uri']);
-}
-
-
-// --- CARGA DE CONFIGURACIÓN DINÁMICA DESDE LA BD ---
+// --- CONFIGURACIÓN DINÁMICA DESDE LA BD (sin cambios) ---
 try {
     $stmt = $pdo->query("SELECT clave, valor FROM configuracion");
     $settings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
     
-    if (!defined('CONFIG_SITIO')) {
-        define('CONFIG_SITIO', $settings);
-    }
-    if (!defined('DEBUG_MODE')) {
-        define('DEBUG_MODE', (isset(CONFIG_SITIO['modo_depuracion']) && CONFIG_SITIO['modo_depuracion'] == '1'));
-    }
+    if (!defined('CONFIG_SITIO')) define('CONFIG_SITIO', $settings);
+    if (!defined('DEBUG_MODE')) define('DEBUG_MODE', (isset(CONFIG_SITIO['modo_depuracion']) && CONFIG_SITIO['modo_depuracion'] == '1'));
 
 } catch (PDOException $e) {
     if (!defined('CONFIG_SITIO')) define('CONFIG_SITIO', []);
@@ -63,24 +65,12 @@ try {
     error_log("Error al cargar la configuración del sitio: " . $e->getMessage());
 }
 
-// --- OTRAS CONSTANTES Y CONFIGURACIONES GLOBALES ---
-
+// --- OTRAS CONSTANTES (sin cambios) ---
 if (!defined('BASE_URL')) {
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
     $host = $_SERVER['HTTP_HOST'];
     define('BASE_URL', $protocol . $host . '/');
 }
-
-if (!defined('AVATARS_PATH')) {
-    define('AVATARS_PATH', ROOT_PATH . '/public/uploads/avatars/');
-}
-
-if (!defined('AVATARS_URL')) {
-    define('AVATARS_URL', BASE_URL . 'uploads/avatars');
-}
-
-if (!defined('LOG_PATH')) {
-    define('LOG_PATH', ROOT_PATH . '/logs/');
-}
-
-// La llamada al autoloader de Composer ha sido eliminada.
+if (!defined('AVATARS_PATH')) define('AVATARS_PATH', ROOT_PATH . '/public/uploads/avatars/');
+if (!defined('AVATARS_URL')) define('AVATARS_URL', BASE_URL . 'uploads/avatars');
+if (!defined('LOG_PATH')) define('LOG_PATH', ROOT_PATH . '/logs/');

@@ -1,0 +1,13 @@
+# Ignorar el archivo de entorno local con las credenciales
+.env
+
+# Ignorar la carpeta de logs
+/logs/
+
+# Ignorar archivos de configuración de IDEs
+.vscode/
+.idea/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
