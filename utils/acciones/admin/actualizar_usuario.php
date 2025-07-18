@@ -5,12 +5,12 @@
 if (!isset($_SESSION['user_id']) || $_SESSION['rango'] !== 'administrador') {
     log_system_event("Intento de edición de usuario no autorizado.", ['usuario_intentando' => $_SESSION['user_id'] ?? 'No logueado']);
     $_SESSION['error_message'] = "No tienes permisos para realizar esta acción.";
-    header('Location: ' . BASE_URL . 'admin/index.php?p=usuarios');
+    header('Location: ' . BASE_URL . 'admin/gestion/editar_usuario.php');
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ' . BASE_URL . 'admin/index.php?p=usuarios');
+    header('Location: ' . BASE_URL . 'admin/gestion/editar_usuario.php');
     exit;
 }
 
@@ -25,7 +25,7 @@ $estados_permitidos = ['pendiente', 'activo', 'suspendido', 'baneado'];
 
 if (!$id_usuario_a_editar || !in_array($nuevo_rango, $rangos_permitidos) || !in_array($nuevo_estado, $estados_permitidos)) {
     $_SESSION['error_message'] = "Datos inválidos para la actualización.";
-    header('Location: ' . BASE_URL . 'admin/index.php?p=usuarios');
+    header('Location: ' . BASE_URL . 'admin/gestion/editar_usuario.php');
     exit;
 }
 
@@ -55,6 +55,6 @@ try {
     $_SESSION['error_message'] = "Error de base de datos: " . $e->getMessage();
 }
 
-header('Location: ' . BASE_URL . 'admin/index.php?p=editar_usuario&id=' . $id_usuario_a_editar);
+header('Location: ' . BASE_URL . 'admin/gestion/editar_usuario.php?id=' . $id_usuario_a_editar);
 exit;
 ?>

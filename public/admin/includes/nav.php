@@ -1,11 +1,21 @@
 <nav class="admin-nav">
   <h3>Navegación</h3>
   <ul>
-    <li><a href="/admin/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">🏠 Dashboard</a></li>
-    <li><a href="/admin/usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' ? 'active' : ''; ?>">👥 Usuarios</a></li>
-	<li><a href="/admin/insignias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'insignias.php' ? 'active' : ''; ?>">🏅 Insignias</a></li>
-    <li><a href="/admin/configuracion.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'configuracion.php' ? 'active' : ''; ?>">⚙️ Configuración</a></li>
-    <li><a href="/admin/system_logs.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'system_logs.php' ? 'active' : ''; ?>">📄 Logs del Sistema</a></li>
-    <li><a href="/admin/api_logs.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'api_logs.php' ? 'active' : ''; ?>">📡 Logs de API</a></li>
+    <li><a href="/admin/index.php">🏠 Dashboard</a></li>
+    <li><a href="/admin/gestion/usuarios.php">👥 Usuarios</a></li>
+  </ul>
+    
+  <li class="nav-section-title">Sistema</li>
+  <ul>
+    <li><a href="/admin/sistema/config/ia.php">🤖 Config. IA</a></li>
+  </ul>
+    
+  <li class="nav-section-title">Logs</li>
+  <ul>
+    <li><a href="/admin/sistema/logs/system.php">📄 Sistema</a></li>
+    <li><a href="/admin/sistema/logs/ia.php">🧠 IA</a></li>
+    <li><a href="/admin/sistema/logs/api.php">📡 API</a></li>
+    <li><a href="/admin/sistema/logs/frontend.php">🌐 Frontend</a></li>
+    <li><a href="/admin/sistema/logs/handler.php">📬 Handlers</a></li>
   </ul>
 </nav>

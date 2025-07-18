@@ -5,13 +5,13 @@
 if (!isset($_SESSION['user_id']) || $_SESSION['rango'] !== 'administrador') {
     log_system_event("Intento de eliminación de usuario no autorizado.", ['usuario_intentando' => $_SESSION['user_id'] ?? 'No logueado']);
     $_SESSION['error_message'] = "No tienes permisos para realizar esta acción.";
-    header('Location: ' . BASE_URL . 'admin/index.php?p=usuarios');
+    header('Location: ' . BASE_URL . 'admin/gestion/usuarios.php');
     exit;
 }
 
 if (!isset($_POST['id_usuario']) || empty($_POST['id_usuario'])) {
     $_SESSION['error_message'] = "No se proporcionó un ID de usuario para eliminar.";
-    header('Location: ' . BASE_URL . 'admin/index.php?p=usuarios');
+    header('Location: ' . BASE_URL . 'admin/gestion/usuarios.php');
     exit;
 }
 
@@ -20,7 +20,7 @@ $id_usuario_a_eliminar = filter_input(INPUT_POST, 'id_usuario', FILTER_VALIDATE_
 // Seguridad: Un administrador no puede eliminarse a sí mismo.
 if ($id_usuario_a_eliminar === (int)$_SESSION['user_id']) {
     $_SESSION['error_message'] = "No puedes eliminar tu propia cuenta desde el panel.";
-    header('Location: ' . BASE_URL . 'admin/index.php?p=usuarios');
+    header('Location: ' . BASE_URL . 'admin/gestion/usuarios.php');
     exit;
 }
 
@@ -49,6 +49,6 @@ try {
     $_SESSION['error_message'] = "Error de base de datos: " . $e->getMessage();
 }
 
-header('Location: ' . BASE_URL . 'admin/index.php?p=usuarios');
+header('Location: ' . BASE_URL . 'admin/gestion/usuarios.php');
 exit;
 ?>

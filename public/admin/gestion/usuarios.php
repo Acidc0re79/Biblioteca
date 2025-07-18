@@ -1,8 +1,5 @@
 <?php
-// /admin/usuarios.php (Versión Completa y Corregida)
-
-require_once __DIR__ . '/includes/auth.php';
-require_once dirname(__DIR__, 2) . '/config/init.php';
+require_once __DIR__ . '/../includes/auth.php';
 
 // ✅ BLOQUE DE CÓDIGO RESTAURADO
 // Obtenemos todos los usuarios de la base de datos para poder mostrarlos en la tabla.
@@ -71,9 +68,9 @@ try {
               </td>
               <td><?= date('d/m/Y', strtotime($usuario['fecha_registro'])) ?></td>
               <td class="actions-cell">
-                <a href="editar_usuario.php?id=<?= $usuario['id_usuario'] ?>">Editar</a>
-                <a href="#" onclick="confirmarEliminacion(<?= $usuario['id_usuario'] ?>, '<?= htmlspecialchars(addslashes($usuario['nombre'] . ' ' . $usuario['apellido'])) ?>')">Eliminar</a>
-              </td>
+					<a href="editar_usuario.php?id=<?= $usuario['id_usuario'] ?>">Editar</a>
+					<a href="#" onclick="confirmarEliminacion(<?= $usuario['id_usuario'] ?>, '<?= htmlspecialchars(addslashes($usuario['nombre'] . ' ' . $usuario['apellido'])) ?>')">Eliminar</a>
+				</td>
             </tr>
           <?php endforeach; ?>
         </tbody>
